@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                String         @id @default(cuid())
+  email             String         @unique
+  username          String         @unique
+  password          String
+  createdAt         DateTime       @default(now())
+  emailVerified     Boolean        @default(false)
+  verificationToken String?        @unique
+  image             String?
+  firstName         String?
+  lastName          String?
+  mobile            String?
+  resetToken        String?        @unique
+  resetTokenExpires DateTime?
+  activities        Activity[]
+  articles          Article[]
+  trainingPlans     TrainingPlan[]
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  title       String
+  distance    Float
+  duration    Int
+  pace        String
+  elevation   Float    @default(0)
+  coordinates Json?
+  userId      String
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Article {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  category  String
+  authorId  String
+  image     String?
+  createdAt DateTime @default(now())
+  author    User     @relation(fields: [authorId], references: [id])
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  date        DateTime
+  organizer   String
+  location    String
+  description String
+  firstName   String
+  lastName    String
+  email       String
+  mobile      String
+  image       String?
+  createdAt   DateTime @default(now())
+}
+
+model TrainingPlan {
+  id          String @id @default(uuid())
+  title       String
+  description String
+  targetKm    Float
+  userId      String
+  user        User   @relation(fields: [userId], references: [id])
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  name      String
+  message   String
+  createdAt DateTime @default(now())
+}
