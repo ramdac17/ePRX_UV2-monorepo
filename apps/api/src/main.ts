@@ -10,7 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   
   // Using 3001 as per your setup
-  const port = process.env.PORT || 3001;
+  const port = process.env.PORT || 3000; // switch this to 3001 if the Web app breaks
 
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ extended: true, limit: '10mb' }));

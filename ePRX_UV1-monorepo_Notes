@@ -1,0 +1,53 @@
+
+Phase 1: Initialize the Monorepo
+
+First, run the Turborepo starter command. This creates the "workspace" that manages everything.
+
+ - npx create-turbo@latest ePRX_UV1-monorepo
+ - pnpm
+ 
+Phase 2: The ePRX V3 Architecture
+
+Once created, your structure should look like this. You will move your existing code into these folders:
+ 
+ 1. The Apps (Targets)
+
+    apps/web: Your existing Next.js project.
+
+    apps/api: Your existing NestJS project.
+
+    apps/mobile: A new Expo project.
+
+2. The Packages (Shared Logic)
+
+    packages/api-client: Shared Axios/TanStack Query hooks (so handleUpdate is written once).
+
+    packages/types: Shared TypeScript interfaces (e.g., User, UploadResponse).
+
+    packages/ui: Shared design tokens (colors, spacing).
+	
+Phase 3: Creating the Mobile App (Expo)
+
+Inside the apps folder, initialize your mobile application:
+
+ - cd apps
+ - npx create-expo-app mobile --template tabs-navigation
+ 
+ To make mobile development feel like your web development, I recommend adding NativeWind so you can use Tailwind CSS on both platforms.
+ 
+Phase 4: Sharing the "Profile Sync" Logic
+
+This is where the magic happens. Remember the handleUpdate function we fixed? Instead of writing it in React and then again in React Native, we create a shared hook.
+
+1. Create packages/api-client/index.ts:
+
+Phase 5: Running Everything
+
+The beauty of Turborepo is the single command to start the entire ePRX V3 ecosystem:
+
+# In the root folder
+ - pnpm dev
+
+ Note: change interface to class from packages/type/src/index.ts
+        or add type on imports
+        set IsolatedModule = false

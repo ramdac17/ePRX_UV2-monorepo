@@ -4,10 +4,10 @@ export class CreateFeedbackDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
-  name: string;
+  name!: string;
 
   @IsString()
   @IsNotEmpty()
   @MaxLength(1000)
-  message: string;
+  message!: string;
 }

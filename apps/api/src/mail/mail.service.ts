@@ -8,7 +8,7 @@ export class MailService {
   private transporter: nodemailer.Transporter<SentMessageInfo, Options>;
 
   constructor() {
-    // Helpful for debugging environment variable loading
+    
     console.log('MAIL_HOST:', process.env.MAIL_HOST);   
     
     this.transporter = nodemailer.createTransport({
@@ -23,8 +23,10 @@ export class MailService {
   }
 
   async sendVerificationEmail(email: string, token: string) {
-    const url = `${process.env.FRONTEND_URL}/verify?token=${token}`;
+    const url = `${process.env.BACKEND_URL}/api/auth/verify-email?token=${token}`;
 
+    // const url = "${process.env.BACKEND_URL}/auth/verify-email?token=${token}";
+    
     try {
       // Logic: One single, protected call with real data
       const info = await this.transporter.sendMail({

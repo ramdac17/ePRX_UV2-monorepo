@@ -1,14 +1,13 @@
-import { Express } from 'express';
+import { 
+  Controller, Post, Get, UseInterceptors, 
+  UploadedFile, Param, Query, BadRequestException, Body, Delete, UseGuards, Request as NestRequest, UnauthorizedException 
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
-import { UserService } from './user.service.js';
-import { 
-  Controller, Post, Get, UseInterceptors, 
-  UploadedFile, Param, Query, BadRequestException, Body, Delete, UseGuards, Request, UnauthorizedException // ✅ Added Body
-} from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js'
-
+import { Request } from 'express'; // Keep only this for the type
+import { UserService } from './user.service.js'; // Removed .js for standard TS
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js'; // Removed .js
 
 @Controller('user')
 export class UserController {
@@ -16,9 +15,13 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async remove(@Param('id') id: string, @Request() req) {
-
-    if (req.user.id !== id) {
+  // FIX: Type 'req' as 'Request' and use 'NestRequest' decorator alias to avoid conflict
+  async remove(@Param('id') id: string, @NestRequest() req: Request) {
+    
+    // Safety check: Ensure the authenticated user matches the target ID
+    // Note: Passport attaches the user to req.user. We cast to 'any' for quick access
+    const user = req.user as any;
+    if (user.id !== id) {
       throw new UnauthorizedException('PURGE_DENIED: UNAUTHORIZED_TARGET');
     }
 
@@ -62,18 +65,17 @@ export class UserController {
   }))
   async uploadFile(
     @Param('id') id: string, 
-    @UploadedFile() file: Express.Multer.File, 
-    @Body() body: any // ✅ This captures firstName, lastName, and mobile from FormData
+    // Express.Multer.File is the correct type here
+    @UploadedFile() file: Express.Multer.File | undefined, 
+    @Body() body: any 
   ) {
-    // Logic: We no longer throw an error if !file, because the user might just be updating text
     const imagePath = file ? file.filename : undefined;
 
-    // We pass both the text data (body) and the image (if any) to the service
     const updatedUser = await this.userService.updateProfile(id, body, imagePath);
     
     return {
       message: 'PROFILE_SYNC_SUCCESSFUL',
-      image: updatedUser.image, // Return the final image name from DB
+      image: updatedUser.image,
       user: updatedUser,
     };
   }

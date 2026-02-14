@@ -1,18 +1,19 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt'; // 1. Import this
+import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma.service.js';
 import { UserService } from '../user/user.service.js';
 import { MailService } from '../mail/mail.service.js'; 
 import * as bcrypt from 'bcrypt';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
+  [x: string]: any;
   constructor(
     private prisma: PrismaService,
     private userService: UserService,
     private mailService: MailService,
-    private jwtService: JwtService, // 2. Inject this
+    private jwtService: JwtService,
   ) {}
 
   async login(loginDto: any) {
@@ -22,11 +23,11 @@ export class AuthService {
       where: { email },
     });
 
+    // Check if user exists and password is correct
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new UnauthorizedException('Username and/or Password is invalid');
+      throw new UnauthorizedException('ACCESS_DENIED: Invalid Credentials');
     }
 
-    // 3. Generate the JWT Payload
     const payload = { 
       sub: user.id, 
       email: user.email,
@@ -35,33 +36,30 @@ export class AuthService {
 
     const { password: _, ...result } = user;
 
-    // 4. Return the structure the Frontend is looking for!
     return {
       user: result,
-      token: this.jwtService.sign(payload),
+      // Fixed: The frontend was looking for "access_token" in previous logs
+      access_token: this.jwtService.sign(payload), 
     };
   }
 
+  // Helper for Passport strategies
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.userService.findUserByEmail(email); 
-    if (user) {
-      const isMatch = await bcrypt.compare(pass, user.password);
-      if (isMatch) {
-        const { password, ...result } = user;
-        return result;
-      }
+    if (user && await bcrypt.compare(pass, user.password)) {
+      const { password, ...result } = user;
+      return result;
     }
     return null;
   }
 
-  // Unified Register Method
   async register(data: any) {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(data.password, salt);
+    
+    // Generate token if not provided by controller
+    const vToken = data.verificationToken || crypto.randomBytes(32).toString('hex');
 
-    console.log('1. INITIATING_DB_RECORD_CREATION for:', data.email);
-
-    // Create the user via the UserService
     const newUser = await this.userService.createUser({
       email: data.email,
       password: hashedPassword,
@@ -69,76 +67,54 @@ export class AuthService {
       lastName: data.lastName,
       mobile: data.mobile,
       username: data.username,
-      verificationToken: data.verificationToken, // Token passed from Controller
+      verificationToken: vToken, 
       emailVerified: false,
     });
 
-    console.log('2. USER_CREATED_SUCCESSFULLY. TOKEN:', newUser.verificationToken);
-
     try {
-      console.log('3. ATTEMPTING_MAIL_TRANSMISSION...');
-      // TRIGGER_EMAIL: Call your email utility here
       await this.mailService.sendVerificationEmail(
         newUser.email, 
-        newUser.verificationToken
+        newUser.verificationToken ?? "" 
       );
-      console.log('4. MAIL_TRANSMISSION_COMPLETE');
     } catch (error) {
-      console.error('❌ MAIL_TRIGGER_CRITICAL_FAILURE:', error);
-      // We don't crash the app here so the user is still created, 
-      // but we see why the email didn't send.
+      const errorMessage = error instanceof Error ? error.message : 'UNKNOWN_SYSTEM_ERROR';
     }
 
     const { password, ...result } = newUser;
-    
     return {
-      message: 'RECRUIT_SYNC_COMPLETE. CHECK_INBOX_FOR_ACTIVATION.',
+      message: 'RECRUIT_SYNC_COMPLETE. CHECK_INBOX.',
       user: result,
     };
   }
-  
-  // Verification logic adapted for Prisma
+
   async verifyEmail(token: string) {
-    // Find user with the matching token
     const user = await this.prisma.user.findFirst({ 
       where: { verificationToken: token } 
     });
 
-    if (!user) {
-      throw new BadRequestException('INVALID_OR_EXPIRED_TOKEN');
-    }
+    if (!user) throw new BadRequestException('INVALID_TOKEN');
 
-    // Update user status
     const updatedUser = await this.prisma.user.update({
       where: { id: user.id },
       data: {
         emailVerified: true,
-        verificationToken: null, // Clear token after use
+        verificationToken: null, 
       },
     });
 
-    return { 
-      status: 'IDENTITY_CONFIRMED', 
-      email: updatedUser.email 
-    };
+    return { status: 'IDENTITY_CONFIRMED', email: updatedUser.email };
   }
 
   async requestPasswordReset(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    
-    if (!user) {
-      return { message: 'RECOVERY_LINK_SENT_IF_ACCOUNT_EXISTS' };
-    }
+    if (!user) return { message: 'RECOVERY_LINK_SENT_IF_EXISTS' };
 
     const resetToken = crypto.randomBytes(32).toString('hex');
-    const expires = new Date(Date.now() + 3600000); // 1 Hour
+    const expires = new Date(Date.now() + 3600000); 
 
     await this.prisma.user.update({
       where: { email },
-      data: { 
-        resetToken, 
-        resetTokenExpires: expires 
-      },
+      data: { resetToken, resetTokenExpires: expires },
     });
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
@@ -148,41 +124,40 @@ export class AuthService {
   }
 
   async resetPassword(resetDto: { token: string; newPassword: string }) {
-  const { token, newPassword } = resetDto;
+    const { token, newPassword } = resetDto;
 
-  // 1. Find user by token AND check if it's still valid (not expired)
-  const user = await this.prisma.user.findFirst({
-    where: {
-      resetToken: token,
-      resetTokenExpires: {
-        gt: new Date(), // "gt" means Greater Than (current time)
+    const user = await this.prisma.user.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpires: { gt: new Date() },
       },
-    },
-  });
+    });
 
-  if (!user) {
-    // SECURITY: Use a generic error so we don't reveal WHY it failed
-    throw new BadRequestException('INVALID_OR_EXPIRED_RECOVERY_TOKEN');
+    if (!user) throw new BadRequestException('LINK_EXPIRED');
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpires: null,
+      },
+    });
+
+    return { status: 'CREDENTIALS_REGENERATED' };
   }
 
-  // 2. Hash the new password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-  // 3. Update user and CLEAR the reset fields so the token can't be used again
-  await this.prisma.user.update({
-    where: { id: user.id },
-    data: {
-      password: hashedPassword,
-      resetToken: null,
-      resetTokenExpires: null,
-    },
-  });
-
-  return { 
-    status: 'CREDENTIALS_REGENERATED', 
-    message: 'You may now sign in with your new password.' 
-  };
-}
-  
+  async updateUserImage(userId: string, imagePath: string) {
+    try {
+      return await this.prisma.user.update({
+        where: { id: userId },
+        data: { image: imagePath },
+      });
+    } catch (error) {
+      console.error('--- [ePRX_UV1] DB_IMAGE_UPDATE_FAILED ---', error);
+      throw new Error('Could not sync profile image to database.');
+    }
+  }
 }

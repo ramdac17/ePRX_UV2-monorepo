@@ -1,9 +1,16 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # Dependencies
-node_modules
+node_modules/
 .pnp
 .pnp.js
+.pnpm-debug.log
+
+# Expo / Mobile
+.expo/
+*.jks
+*.p8
+*.api-key.json
 
 # Local env files
 .env
@@ -36,3 +43,10 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Environment Secrets (CRITICAL)
+.env
+.env.local
+
+# Local Uploads (Avoid backing up user-uploaded test images)
+apps/api/uploads/avatars/*

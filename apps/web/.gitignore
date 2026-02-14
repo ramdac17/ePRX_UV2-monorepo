@@ -34,3 +34,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Ignore uploaded profile pictures
+apps/api/uploads/*
+!apps/api/uploads/.gitkeep
