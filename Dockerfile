@@ -1,28 +1,38 @@
 FROM node:22.12-slim AS base
+
+# Install system dependencies
 RUN apt-get update && apt-get install -y openssl libssl-dev && rm -rf /var/lib/apt/lists/*
+
+# Setup pnpm
 RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 WORKDIR /app
 
-# 1. FORCE Prisma to be silent during the install phase
+# 1. Block all automatic scripts
 ENV PRISMA_SKIP_POSTINSTALL_GENERATE=true
-# 2. Tell pnpm to ignore all scripts (like prisma postinstall)
 ENV pnpm_config_ignore_scripts=true
 
+# 2. Copy the structure first
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/ ./packages/
 
-# Install without running any scripts
+# 3. CRITICAL: Physically copy the Prisma folder specifically 
+# This ensures Docker "sees" the file before we install anything
+COPY apps/api/prisma ./apps/api/prisma
+
+# 4. Install dependencies (scripts ignored)
 RUN pnpm install --frozen-lockfile
 
-# Now copy the rest of your source code
+# 5. Copy the rest of the source code
 COPY . .
 
-# 3. MANUALLY run the generate command now that the file definitely exists
-RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
+# 6. Manual Generate - Using a relative path that we just verified
+RUN npx prisma generate --schema=./apps/api/prisma/schema.prisma
 
-# Build the project
+# 7. Build
 RUN pnpm run build:api
 
 EXPOSE 3000
-CMD ["node", "apps/api/dist/main.js"]
+
+# Using a robust start command for monorepos
+CMD ["pnpm", "--filter", "api", "run", "start"]
