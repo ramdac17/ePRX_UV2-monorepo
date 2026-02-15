@@ -3,24 +3,26 @@ RUN apt-get update && apt-get install -y openssl libssl-dev && rm -rf /var/lib/a
 RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 WORKDIR /app
 
-# Disable ALL automatic scripts during the initial install
+# 1. FORCE Prisma to be silent during the install phase
 ENV PRISMA_SKIP_POSTINSTALL_GENERATE=true
+# 2. Tell pnpm to ignore all scripts (like prisma postinstall)
+ENV pnpm_config_ignore_scripts=true
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/ ./packages/
 
-# Use --ignore-scripts to stop the "file not found" loop
-RUN pnpm install --frozen-lockfile --ignore-scripts
+# Install without running any scripts
+RUN pnpm install --frozen-lockfile
 
-# Now copy the rest of the source
+# Now copy the rest of your source code
 COPY . .
 
-# Manually generate the client now that the files are definitely there
+# 3. MANUALLY run the generate command now that the file definitely exists
 RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
 
-# Build the API (Turbo will handle the sub-dependencies)
+# Build the project
 RUN pnpm run build:api
 
 EXPOSE 3000
-CMD ["pnpm", "run", "start:api"]
+CMD ["node", "apps/api/dist/main.js"]
