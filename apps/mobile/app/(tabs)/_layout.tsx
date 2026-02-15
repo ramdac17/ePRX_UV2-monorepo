@@ -1,41 +1,46 @@
-import React from "react";
 import { Tabs } from "expo-router";
-import { Chrome as TabIcon, Settings, Home } from "lucide-react-native";
+import { Home, User, Cog } from "lucide-react-native";
 import { CYBER_THEME } from "@/constants/Colors";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
         tabBarActiveTintColor: CYBER_THEME.primary,
         tabBarInactiveTintColor: "#444",
         tabBarStyle: {
           backgroundColor: "#000",
-          borderTopWidth: 1,
           borderTopColor: "#222",
           height: 60,
           paddingBottom: 10,
         },
-        tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: "bold",
-          letterSpacing: 1,
-        },
+        headerShown: false,
       }}
     >
+      {/* Maps to index.tsx */}
       <Tabs.Screen
         name="index"
         options={{
-          title: "DASHBOARD",
-          tabBarIcon: ({ color }) => <Home size={20} color={color} />,
+          title: "HOME",
+          tabBarIcon: ({ color }) => <Home size={24} color={color} />,
         }}
       />
+
+      {/* Maps to profile.tsx (Previously two.tsx) */}
       <Tabs.Screen
-        name="two"
+        name="profile"
         options={{
-          title: "SETTINGS",
-          tabBarIcon: ({ color }) => <Settings size={20} color={color} />,
+          title: "IDENTITY",
+          tabBarIcon: ({ color }) => <User size={24} color={color} />,
+        }}
+      />
+
+      {/* Maps to settings.tsx */}
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: "CONFIG",
+          tabBarIcon: ({ color }) => <Cog size={24} color={color} />,
         }}
       />
     </Tabs>

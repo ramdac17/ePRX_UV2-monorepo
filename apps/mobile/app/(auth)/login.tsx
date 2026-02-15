@@ -5,43 +5,59 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
+  Alert, // Added for system feedback
+  ActivityIndicator,
 } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { CYBER_THEME } from "@/constants/Colors";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import axios from "axios";
-import { saveToken } from "@/utils/auth";
-import { storeToken } from "@/utils/authStorage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "@/utils/api"; // Import your axios instance
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Added loading state
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("REQUIRED", "CREDENTIAL_ID_OR_ACCESS_CODE_MISSING");
+      return;
+    }
+
+    setIsLoading(true);
     try {
       const response = await axios.post(`${API_URL}/auth/login`, {
         email: email.toLowerCase().trim(),
         password,
       });
 
-      // 1. Extract the token explicitly
       const token = response.data.access_token;
 
-      // 2. ONLY call storeToken if we have a valid string
       if (token && typeof token === "string") {
-        await storeToken(token);
-        // Ensure there are NO other calls to storeToken() or SecureStore here!
+        // 1. Persist the token
+        await AsyncStorage.setItem("userToken", token);
+
+        // 2. Set the global API header immediately
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
         console.log("ePRX_UV1_SESSION_ESTABLISHED");
+
+        // 3. Redirect - The RootLayout will now see 'hasToken' as true
         router.replace("/(tabs)");
+      } else {
+        throw new Error("INVALID_TOKEN_FORMAT");
       }
     } catch (error: any) {
       console.error("AUTH_SEQUENCE_INTERRUPTED", error);
+      const msg = error.response?.data?.message || "UPLINK_ERROR";
+      Alert.alert("ACCESS_DENIED", msg.toUpperCase());
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -53,6 +69,7 @@ export default function LoginScreen() {
       <View style={styles.background}>
         <View style={styles.glowTop} />
         <View style={styles.glowBottom} />
+
         <View style={styles.header}>
           <Text style={styles.logoText}>
             ePRX <Text style={{ color: CYBER_THEME.primary }}>UV1</Text>
@@ -65,18 +82,19 @@ export default function LoginScreen() {
         <View style={styles.glassCard}>
           <Text style={styles.label}>CREDENTIAL_ID</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, isLoading && { opacity: 0.5 }]}
             placeholder="USER@SYSTEM.IO"
             placeholderTextColor="#444"
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
             editable={!isLoading}
+            keyboardType="email-address"
           />
 
           <Text style={styles.label}>ACCESS_CODE</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, isLoading && { opacity: 0.5 }]}
             placeholder="••••••••"
             placeholderTextColor="#444"
             secureTextEntry
@@ -93,14 +111,17 @@ export default function LoginScreen() {
               (pressed || isLoading) && { opacity: 0.7 },
             ]}
           >
-            <Text style={styles.buttonText}>
-              {isLoading ? "PROCESSING..." : "INITIALIZE_LOGIN"}
-            </Text>
+            {isLoading ? (
+              <ActivityIndicator color="#000" />
+            ) : (
+              <Text style={styles.buttonText}>INITIALIZE_LOGIN</Text>
+            )}
           </Pressable>
 
           <Pressable
             style={styles.secondaryLink}
-            onPress={() => router.push("/register")} // Prep for next step
+            onPress={() => router.push("/(auth)/register")}
+            disabled={isLoading}
           >
             <Text style={styles.secondaryText}>NEW_USER? [REGISTER_ENTRY]</Text>
           </Pressable>
@@ -111,12 +132,12 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: "#000" },
   background: {
     flex: 1,
-    backgroundColor: CYBER_THEME.background,
     padding: 25,
     justifyContent: "center",
+    backgroundColor: "transparent",
   },
   glowTop: {
     position: "absolute",
@@ -128,19 +149,16 @@ const styles = StyleSheet.create({
     borderRadius: 150,
     opacity: 0.1,
   },
-
   glowBottom: {
     position: "absolute",
     bottom: -120,
     right: -80,
     width: 300,
     height: 300,
-    backgroundColor: CYBER_THEME.accent, // Neon Magenta
+    backgroundColor: "#FF00FF", // Magenta glow
     borderRadius: 150,
-    opacity: 0.15,
-    zIndex: -1,
+    opacity: 0.1,
   },
-
   header: { backgroundColor: "transparent", marginBottom: 40 },
   logoText: {
     fontSize: 42,
@@ -155,20 +173,18 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   glassCard: {
-    backgroundColor: CYBER_THEME.card,
+    backgroundColor: "#0a0a0a",
     padding: 25,
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: CYBER_THEME.border,
-    shadowColor: CYBER_THEME.primary,
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
+    borderColor: "#1a1a1a",
   },
   label: {
-    color: CYBER_THEME.textMuted,
+    color: "#666",
     fontSize: 10,
     marginBottom: 8,
     letterSpacing: 1,
+    fontWeight: "bold",
   },
   input: {
     backgroundColor: "#000",
@@ -186,9 +202,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     marginTop: 10,
-    shadowColor: CYBER_THEME.primary,
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
   },
   buttonText: { color: "#000", fontWeight: "900", letterSpacing: 1 },
   secondaryLink: {
@@ -196,5 +209,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "transparent",
   },
-  secondaryText: { color: CYBER_THEME.textMuted, fontSize: 11 },
+  secondaryText: { color: "#444", fontSize: 11 },
 });

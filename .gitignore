@@ -29,10 +29,12 @@ coverage
 .vercel
 
 # Build Outputs
+node_modules/
+dist/
+.expo/
 .next/
-out/
-build
-dist
+*.log
+.env
 
 
 # Debug

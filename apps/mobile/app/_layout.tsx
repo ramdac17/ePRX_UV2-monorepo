@@ -1,7 +1,7 @@
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
-import { getToken } from "@/utils/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const MyCyberTheme = {
   ...DarkTheme,
@@ -16,34 +16,51 @@ const MyCyberTheme = {
 };
 
 export default function RootLayout() {
-  const [isReady, setIsReady] = useState(false);
   const segments = useSegments();
   const router = useRouter();
+  const [isAuthLoaded, setIsAuthLoaded] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
 
+  // 1. Initial Auth Check & Observer
   useEffect(() => {
     const checkAuth = async () => {
-      const token = await getToken();
-      const inAuthGroup = segments[0] === "(auth)";
-
-      if (!token && !inAuthGroup) {
-        // No token and trying to access tabs? Go to Login.
-        router.replace("/login");
-      } else if (token && inAuthGroup) {
-        // Has token and at login? Go to Dashboard.
-        router.replace("/(tabs)");
+      try {
+        const token = await AsyncStorage.getItem("userToken");
+        setHasToken(!!token);
+      } catch (e) {
+        setHasToken(false);
+      } finally {
+        setIsAuthLoaded(true);
       }
-      setIsReady(true);
     };
-
     checkAuth();
-  }, [segments]);
+  }, [segments]); // Re-run check whenever the user moves between screens
 
-  if (!isReady) return null; // Or a Cyberpunk loading spinner
+  // 2. Navigation Guard logic
+  useEffect(() => {
+    // Wait until we actually know if the user has a token
+    if (!isAuthLoaded) return;
+
+    const inAuthGroup = segments[0] === "(auth)";
+
+    if (!hasToken && !inAuthGroup) {
+      // Not logged in -> Kick to login
+      router.replace("/login");
+    } else if (hasToken && inAuthGroup) {
+      // Logged in -> Move to dashboard
+      router.replace("/(tabs)");
+    }
+  }, [hasToken, isAuthLoaded, segments]);
+
+  // 3. Prevent flickering while checking auth
+  if (!isAuthLoaded) return null;
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)/login" options={{ animation: "fade" }} />
-      <Stack.Screen name="(tabs)" options={{ animation: "slide_from_right" }} />
-    </Stack>
+    <ThemeProvider value={MyCyberTheme}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </ThemeProvider>
   );
 }

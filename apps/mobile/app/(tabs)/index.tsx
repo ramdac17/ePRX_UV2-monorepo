@@ -1,258 +1,361 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   StyleSheet,
-  TextInput,
-  Pressable,
-  Alert,
   ScrollView,
-  Platform,
   TouchableOpacity,
   Image,
-  View, // Use standard View
-  Text, // Use standard Text
+  View,
+  Text,
+  Dimensions,
+  Animated,
+  PanResponder,
 } from "react-native";
-import api from "@/utils/api"; // Use your interceptor, not raw axios
-import { CreateFeedbackDto } from "@repo/types";
+import { LineChart } from "react-native-chart-kit";
+import api from "@/utils/api";
 import { CYBER_THEME } from "@/constants/Colors";
 import { useRouter } from "expo-router";
-import { User } from "lucide-react-native";
+import { User, Activity, Lock, Play } from "lucide-react-native";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const screenWidth = Dimensions.get("window").width;
+const screenHeight = Dimensions.get("window").height;
 
 export default function TabOneScreen() {
-  const [user, setUser] = useState<any>(null); // FIXED: Added missing user state
-  const [status, setStatus] = useState<string>("SCANNING_NETWORK...");
-  const [name, setName] = useState("");
-  const [message, setMessage] = useState("");
-  const [isSending, setIsSending] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [status, setStatus] = useState<string>("SCANNING...");
   const router = useRouter();
+  const [chartData, setChartData] = useState<{
+    labels: string[];
+    datasets: any[];
+  }>({
+    labels: ["Log_0", "Log_1", "Log_2", "Log_3", "Log_4", "Log_5", "Log_6"],
+    datasets: [{ data: [0, 0, 0, 0, 0, 0, 0] }],
+  });
+  const [summary, setSummary] = useState({
+    totalDistance: "0",
+    totalHours: "0",
+    activityCount: 0,
+  });
+
+  const pan = useRef(new Animated.ValueXY()).current;
+  const isDragging = useRef(false);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
+      },
+      onPanResponderGrant: () => {
+        isDragging.current = true;
+        pan.extractOffset();
+      },
+      onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
+        useNativeDriver: false,
+      }),
+      onPanResponderRelease: (e, gestureState) => {
+        isDragging.current = false;
+        pan.flattenOffset();
+
+        const iconSize = 60;
+        const topBoundary = -screenHeight + 250;
+        const bottomBoundary = 20;
+
+        let targetY = (pan.y as any)._value || 0;
+        if (targetY < topBoundary) targetY = topBoundary;
+        if (targetY > bottomBoundary) targetY = bottomBoundary;
+
+        const isLeftSide = gestureState.moveX < screenWidth / 2;
+        const targetX = isLeftSide ? -(screenWidth - iconSize - 40) : 0;
+
+        Animated.parallel([
+          Animated.spring(pan.y, {
+            toValue: targetY,
+            useNativeDriver: false,
+            friction: 8,
+          }),
+          Animated.spring(pan.x, {
+            toValue: targetX,
+            useNativeDriver: false,
+            friction: 6,
+          }),
+        ]).start();
+      },
+    }),
+  ).current;
+
+  const API_URL = process.env.EXPO_PUBLIC_API_URL || "";
+  const BASE_IMAGE_URL = API_URL.replace("/api", "");
 
   useEffect(() => {
-    // Fetch User Profile for the Avatar
-    const fetchProfile = async () => {
+    const initializeCore = async () => {
+      await fetchProfile();
+      await fetchStats();
       try {
-        const res = await api.get("/auth/profile");
-        setUser(res.data);
-      } catch (e) {
-        console.error("PROFILE_FETCH_ERROR", e);
+        const res = await api.get(`/status`);
+        setStatus(`CORE_ONLINE_V${res.data?.version || "1.0.0"}`);
+      } catch {
+        setStatus("CORE_OFFLINE");
       }
     };
-
-    // Check System Status
-    if (!API_URL) {
-      setStatus("CONFIG_ERROR: ENV_MISSING");
-    } else {
-      api
-        .get(`/status`)
-        .then((res: any) => {
-          const version = res.data?.version || "1.0.0";
-          setStatus(`CORE_ONLINE_V${version}`);
-        })
-        .catch(() => setStatus("CORE_OFFLINE"));
-    }
-
-    fetchProfile();
+    initializeCore();
   }, []);
 
-  const sendFeedback = async () => {
-    if (!name || !message) {
-      Alert.alert("SYSTEM_ERROR", "DATA_FIELDS_EMPTY");
-      return;
-    }
-
-    setIsSending(true);
+  const fetchStats = async () => {
     try {
-      const payload: CreateFeedbackDto = { name, message };
-      await api.post(`/status/feedback`, payload);
-      Alert.alert("LINK_ESTABLISHED", "FEEDBACK_SENT_TO_CORE");
-      setMessage("");
-    } catch (err) {
-      Alert.alert("UPLINK_ERROR", "TRANSMISSION_FAILED");
-    } finally {
-      setIsSending(false);
+      const response = await api.get("/activities/stats");
+      const { recent, summary } = response.data;
+      setSummary(summary);
+
+      if (recent.length > 0) {
+        const rawData = [...recent].reverse();
+        setChartData({
+          labels: rawData.map((a: any) =>
+            new Date(a.createdAt).toLocaleDateString("en-US", {
+              weekday: "short",
+            }),
+          ),
+          datasets: [
+            {
+              data: rawData.map((a: any) => parseFloat(a.distance)),
+              color: (opacity = 1) => `rgba(0, 255, 242, ${opacity})`,
+              strokeWidth: 2,
+            },
+          ],
+        });
+      }
+    } catch (error) {
+      console.error("DASHBOARD_STATS_ERROR", error);
+    }
+  };
+
+  const fetchProfile = async () => {
+    try {
+      const res = await api.get("/auth/profile");
+      setUser(res.data);
+    } catch (e) {
+      console.error("DASHBOARD_PROFILE_ERROR", e);
+    }
+  };
+
+  const handleStartActivity = () => {
+    if (!isDragging.current) {
+      router.push("/start-activity");
     }
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContainer}
-      style={{ backgroundColor: "#000" }} // Force black for Cyberpunk feel
-    >
-      <View style={styles.container}>
-        {/* Header Section */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => router.push("/profile")}
-            style={styles.avatarContainer}
-          >
-            {user?.image ? (
-              <Image
-                source={{ uri: `${API_URL}${user.image}` }}
-                style={styles.avatarCircle}
+    <View style={{ flex: 1, backgroundColor: "#000" }}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.container}>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.glitchText}>Welcome back,</Text>
+              <Text style={[styles.glitchText, { fontSize: 24 }]}>
+                {user?.firstName?.toUpperCase() || "OPERATIVE"}
+              </Text>
+              <Text style={styles.subTitle}>ePRX_UV1 // DASHBOARD_ACCESS</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => router.push("/profile")}
+              style={styles.avatarContainer}
+            >
+              {user?.image ? (
+                <Image
+                  source={{ uri: `${BASE_IMAGE_URL}${user.image}` }}
+                  style={styles.avatarCircle}
+                />
+              ) : (
+                <View style={styles.avatarPlaceholder}>
+                  <User color={CYBER_THEME.primary} size={20} />
+                </View>
+              )}
+              <View
+                style={[
+                  styles.statusBadgeOverlay,
+                  {
+                    backgroundColor: status.includes("ONLINE")
+                      ? "#00ff00"
+                      : "#ff0000",
+                  },
+                ]}
               />
-            ) : (
-              <View style={[styles.avatarCircle, styles.avatarPlaceholder]}>
-                <User color={CYBER_THEME.primary} size={24} />
-              </View>
-            )}
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </View>
 
-          <View>
-            <Text style={styles.glitchText}>SYSTEM_DASHBOARD</Text>
-            <Text style={styles.subTitle}>
-              PROJECT_VISTA // {user?.firstName?.toUpperCase() || "OPERATIVE"}
-            </Text>
+          {/* METRICS_SUMMARY */}
+          <View style={styles.summaryGrid}>
+            <View style={styles.metricBox}>
+              <Text style={styles.metricLabel}>TOTAL_KM</Text>
+              <Text style={styles.metricValue}>{summary.totalDistance}</Text>
+            </View>
+            <View style={styles.metricBox}>
+              <Text style={styles.metricLabel}>CORE_HOURS</Text>
+              <Text style={styles.metricValue}>{summary.totalHours}</Text>
+            </View>
+            <View style={styles.metricBox}>
+              <Text style={styles.metricLabel}>SESSIONS</Text>
+              <Text style={styles.metricValue}>{summary.activityCount}</Text>
+            </View>
+          </View>
+
+          {/* Chart Section */}
+          <View style={styles.chartCard}>
+            <View style={styles.cardHeader}>
+              <Activity size={14} color={CYBER_THEME.primary} />
+              <Text style={styles.label}>NETWORK_ACTIVITY_LOAD (KM)</Text>
+            </View>
+            <LineChart
+              data={chartData}
+              width={screenWidth - 70} // Adjusted for inner padding
+              height={220}
+              chartConfig={{
+                backgroundColor: "#000",
+                backgroundGradientFrom: "#0a0a0a",
+                backgroundGradientTo: "#000",
+                decimalPlaces: 1,
+                color: (opacity = 1) => `rgba(0, 255, 242, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(102, 102, 102, ${opacity})`,
+                propsForDots: {
+                  r: "4",
+                  strokeWidth: "2",
+                  stroke: CYBER_THEME.primary,
+                },
+                paddingRight: 64, // Pushes grid right to center it against labels
+              }}
+              bezier
+              style={{
+                marginVertical: 8,
+                borderRadius: 10,
+                alignSelf: "center",
+              }}
+            />
           </View>
         </View>
+      </ScrollView>
 
-        {/* Status Badge */}
-        <View style={styles.statusBadge}>
-          <View
-            style={[
-              styles.statusDot,
-              {
-                backgroundColor: status.includes("ONLINE")
-                  ? "#00ff00"
-                  : "#ff0000",
-              },
-            ]}
-          />
-          <Text style={styles.statusText}>{status}</Text>
-        </View>
-
-        {/* Dashboard Card */}
-        <View style={styles.glassCard}>
-          <Text style={styles.label}>TRANSMIT_FEEDBACK</Text>
-
-          <TextInput
-            style={styles.input}
-            placeholder="OPERATOR_NAME"
-            placeholderTextColor="#444"
-            value={name}
-            onChangeText={setName}
-          />
-
-          <TextInput
-            style={[styles.input, { height: 100, textAlignVertical: "top" }]}
-            placeholder="ENCODE_MESSAGE..."
-            placeholderTextColor="#444"
-            value={message}
-            onChangeText={setMessage}
-            multiline
-          />
-
-          <Pressable
-            onPress={sendFeedback}
-            disabled={isSending}
-            style={({ pressed }) => [
-              styles.button,
-              (pressed || isSending) && { opacity: 0.7 },
-            ]}
-          >
-            <Text style={styles.buttonText}>
-              {isSending ? "UPLOADING..." : "EXECUTE_TRANSMISSION"}
-            </Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            SECURE_NODE: {API_URL?.replace("http://", "")}
-          </Text>
-        </View>
-      </View>
-    </ScrollView>
+      {/* --- FLOATING CYBERPLAY ICON --- */}
+      <Animated.View
+        style={[
+          styles.floatingIcon,
+          { transform: [{ translateX: pan.x }, { translateY: pan.y }] },
+        ]}
+        {...panResponder.panHandlers}
+      >
+        <TouchableOpacity
+          style={styles.playCircle}
+          activeOpacity={0.8}
+          onPress={handleStartActivity}
+        >
+          <Play size={28} color="#000" fill="#000" />
+        </TouchableOpacity>
+      </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   scrollContainer: { flexGrow: 1 },
-  container: {
-    flex: 1,
-    padding: 20,
-    paddingTop: 60,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10, // Reduced to make room for status badge
-    gap: 15,
-  },
+  container: { padding: 20, paddingTop: 60 },
+  header: { flexDirection: "row", alignItems: "center", marginBottom: 30 },
   glitchText: {
     color: CYBER_THEME.primary,
-    fontSize: 22,
+    fontSize: 14,
     fontWeight: "900",
-  },
-  subTitle: {
-    color: "#666",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-  statusBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#111",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 4,
-    alignSelf: "flex-start",
-    marginBottom: 25,
-    borderWidth: 1,
-    borderColor: "#222",
-  },
-  statusDot: { width: 6, height: 6, borderRadius: 3, marginRight: 8 },
-  statusText: {
-    fontSize: 9,
-    color: "#aaa",
-    fontWeight: "bold",
     letterSpacing: 1,
   },
-  glassCard: {
-    backgroundColor: "#0a0a0a",
-    padding: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#222",
-  },
-  label: {
-    color: CYBER_THEME.primary,
-    fontSize: 10,
-    marginBottom: 15,
-    letterSpacing: 2,
-    fontWeight: "bold",
-  },
-  input: {
-    backgroundColor: "#000",
-    color: "#fff",
-    padding: 15,
-    borderRadius: 5,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "#333",
-    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
-  },
-  button: {
-    backgroundColor: CYBER_THEME.primary,
-    padding: 18,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  buttonText: { color: "#000", fontWeight: "900", letterSpacing: 1 },
-  footer: {
-    marginTop: 40,
-    alignItems: "center",
-  },
-  footerText: { color: "#333", fontSize: 10, fontFamily: "monospace" },
+  subTitle: { color: "#444", fontSize: 10, fontWeight: "bold", marginTop: 4 },
   avatarContainer: {
     borderWidth: 1,
     borderColor: CYBER_THEME.primary,
     padding: 2,
-    borderRadius: 25,
+    borderRadius: 100,
+    position: "relative",
   },
-  avatarCircle: { width: 44, height: 44, borderRadius: 22 },
+  avatarCircle: { width: 50, height: 50, borderRadius: 100 },
   avatarPlaceholder: {
+    width: 50,
+    height: 50,
+    borderRadius: 100,
     backgroundColor: "#111",
     justifyContent: "center",
     alignItems: "center",
+  },
+  statusBadgeOverlay: {
+    position: "absolute",
+    bottom: 2,
+    right: 2,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: "#000",
+  },
+  summaryGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 25,
+    gap: 10,
+  },
+  metricBox: {
+    flex: 1,
+    backgroundColor: "#0a0a0a",
+    paddingVertical: 15,
+    paddingHorizontal: 5,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#1a1a1a",
+    alignItems: "center",
+  },
+  metricLabel: {
+    color: "#444",
+    fontSize: 9,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  metricValue: {
+    color: CYBER_THEME.primary,
+    fontSize: 18,
+    fontWeight: "900",
+  },
+  chartCard: {
+    backgroundColor: "#0a0a0a",
+    padding: 15,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#1a1a1a",
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  cardHeader: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 10,
+    alignItems: "center",
+    alignSelf: "flex-start",
+  },
+  label: { color: CYBER_THEME.primary, fontSize: 10, fontWeight: "bold" },
+  floatingIcon: {
+    position: "absolute",
+    bottom: 40,
+    right: 20,
+    zIndex: 9999,
+  },
+  playCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: CYBER_THEME.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: CYBER_THEME.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 4,
+    borderColor: "#000",
   },
 });

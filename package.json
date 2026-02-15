@@ -3,17 +3,14 @@
   "private": true,
   "packageManager": "pnpm@9.0.0",
   "engines": {
-    "node": ">=18"
+    "node": ">=22.12.0"
   },
   "scripts": {
     "dev": "node scripts/update-ip.js && turbo run dev",
-    "build": "node scripts/update-ip.js && turbo run build",
+    "build": "turbo run build", 
+    "build:api": "turbo run build --filter=api", 
     "sync-ip": "node scripts/update-ip.js",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types",
-    "clean:ports": "npx kill-port 3000 3001 4000",
-    "nuke": "pnpm clean:ports && pnpm dev"
+    "start:api": "node apps/api/dist/main.js"
   },
   "devDependencies": {
     "prettier": "^3.7.4",
