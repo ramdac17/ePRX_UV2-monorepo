@@ -23,8 +23,8 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Generate Prisma Client (crucial for monorepos)
-RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
 
+RUN npx prisma generate --schema=./apps/api/prisma/schema.prisma
 # Build the API
 RUN pnpm run build:api
 
