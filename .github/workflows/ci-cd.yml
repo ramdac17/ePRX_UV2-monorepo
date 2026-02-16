@@ -13,9 +13,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 9.0.0
+          version: 10.28.2
 
       - uses: actions/setup-node@v4
         with:
@@ -23,13 +23,15 @@ jobs:
           cache: 'pnpm'
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: Build Types Package
         run: pnpm --filter @repo/types run build
 
       - name: Generate Prisma Client
-        run: DATABASE_URL="postgresql://unused:unused@localhost:5432/unused" npx prisma generate --schema=apps/api/prisma/schema.prisma
+        run: |
+          DATABASE_URL="postgresql://unused:unused@localhost:5432/unused" \
+          pnpm prisma generate --schema=apps/api/prisma/schema.prisma
 
       - name: Run Linting
         run: pnpm --filter api run lint     
