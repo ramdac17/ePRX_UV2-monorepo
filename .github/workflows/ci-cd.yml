@@ -46,6 +46,9 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+      - name: Run Linting
+        run: pnpm --filter api run lint
+
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -54,6 +57,6 @@ jobs:
 
       - name: Deploy to Railway
         # This triggers the Railway build using the stable Dockerfile we created
-        run: railway up --service api --detach
+        run: railway up --service 7b91e00c-a6f6-41c8-94f4-e5927a4bab25 --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
