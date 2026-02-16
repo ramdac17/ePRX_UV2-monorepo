@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "node scripts/update-ip.js && turbo run dev",
-    "build": "turbo run build", 
+    "build": "nest build --path ./tsconfig.json",
     "build:api": "turbo run build --filter=api", 
     "sync-ip": "node scripts/update-ip.js",
     "start:api": "node apps/api/dist/main.js",

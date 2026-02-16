@@ -23,21 +23,21 @@ COPY apps/api/prisma ./apps/api/prisma
 # 4. Install dependencies (scripts ignored)
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
-# 5. Copy the rest of the source code
+# 5. Install with ignore-scripts to skip that broken postinstall
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# 6. Copy the rest of the source code
 COPY . .
 
-# 6. Generate - explicitly in the context of the api folder
+# 7. MANUALLY Generate Prisma Client
+# We use npx to ensure it finds the hoisted prisma binary
 RUN cd apps/api && DATABASE_URL="postgresql://unused:unused@localhost:5432/unused" npx prisma generate
 
-# 7. Build the NestJS app
+# 8. Build the API
 RUN pnpm --filter api run build
 
-# 8. Expose the port
 EXPOSE 3000
 
-# 9. THE FINAL MOVES: 
-# Move into the api directory so the 'prisma' command finds the schema at 'prisma/schema.prisma'
-WORKDIR /app/apps/api
-
-# Run migrations using the binary we confirmed is in dependencies, then start the server
-CMD ["sh", "-c", "../../node_modules/.bin/prisma migrate deploy && node dist/main.js"]
+# 9. RUNTIME
+WORKDIR /app
+CMD ["sh", "-c", "npx prisma migrate deploy --schema=./apps/api/prisma/schema.prisma && node apps/api/dist/main.js"]
