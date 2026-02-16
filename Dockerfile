@@ -39,5 +39,6 @@ RUN pnpm --filter api run build
 EXPOSE 3000
 
 # 9. RUNTIME
-WORKDIR /app
-CMD ["sh", "-c", "npx prisma migrate deploy --schema=./apps/api/prisma/schema.prisma && node apps/api/dist/main.js"]
+WORKDIR /app/apps/api
+RUN ls -R
+CMD ["pnpm", "start:prod"]
