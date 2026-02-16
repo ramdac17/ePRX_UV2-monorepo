@@ -15,7 +15,8 @@
     "paths": {
       "@prisma/client": ["./prisma/client/index.d.ts"],
       "@repo/types": ["../../packages/types/src/index.ts"]
-    }
+    },
+    "isolatedModules": true,
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
