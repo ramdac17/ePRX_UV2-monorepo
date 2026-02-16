@@ -25,32 +25,26 @@ jobs:
           cache: 'pnpm'
 
       - name: Install Dependencies
-        # We use --ignore-scripts to prevent the Prisma postinstall crash we solved earlier
         run: pnpm install --frozen-lockfile --ignore-scripts
-
-      - name: Run Linting
-        run: pnpm --filter api run lint     
 
       - name: Build Types Package
         run: pnpm --filter @repo/types run build || echo "Package has no build script, skipping."
 
       - name: Generate Prisma Client
-        # This mirrors our successful Docker build step
         run: npx prisma generate --schema=apps/api/prisma/schema.prisma
 
+      - name: Run Linting
+        # Moved here so it has access to generated Prisma types
+        run: pnpm --filter api run lint     
+
       - name: Type-Check and Build API
-        # This ensures the 28 errors we fixed don't come back
-        run: |
-          pnpm --filter api run build
+        run: pnpm --filter api run build
 
   deploy:
     needs: test-and-build
-    # Only deploy if we are on the main branch and the build passed
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-     
-
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -58,7 +52,6 @@ jobs:
         run: npm i -g @railway/cli
 
       - name: Deploy to Railway
-        # This triggers the Railway build using the stable Dockerfile we created
         run: railway up --service 7b91e00c-a6f6-41c8-94f4-e5927a4bab25 --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
