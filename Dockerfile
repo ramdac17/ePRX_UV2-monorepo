@@ -26,13 +26,14 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 # 5. Copy the rest of the source code
 COPY . .
 
-# 6. Manual Generate - Using a relative path that we just verified
+# 6. Manual Generate - Pointing to the local path
 RUN cd apps/api && DATABASE_URL="postgresql://unused:unused@localhost:5432/unused" npx prisma generate
 
-# 7. Build
+# 7. Build the API
 RUN pnpm --filter api run build
 
 EXPOSE 3000
 
-# Using a robust start command for monorepos
-CMD ["sh", "-c", "npx prisma migrate deploy --schema=/app/apps/api/prisma/schema.prisma && node /app/apps/api/dist/main.js"]
+# THE FIX: Pointing to the exact location of the prisma binary 
+# and using the absolute path to the schema.
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy --schema=./apps/api/prisma/schema.prisma && node apps/api/dist/main.js"]
