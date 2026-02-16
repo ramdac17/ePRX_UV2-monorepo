@@ -26,15 +26,19 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 # 5. Copy the rest of the source code
 COPY . .
 
-# 6. Manual Generate - Pointing to the local path
+# 6. Generate - explicitly in the app folder
 RUN cd apps/api && DATABASE_URL="postgresql://unused:unused@localhost:5432/unused" npx prisma generate
 
-# 7. Build the API
+# 7. Build
 RUN pnpm --filter api run build
+
+# 8. THE FIX: Symlink for the runtime environment
 RUN ln -s /app/apps/api/node_modules/.bin/prisma /usr/local/bin/prisma
 
 EXPOSE 3000
 
-# THE FIX: Pointing to the exact location of the prisma binary 
-# and using the absolute path to the schema.
-CMD ["sh", "-c", "prisma migrate deploy --schema=./apps/api/prisma/schema.prisma && node apps/api/dist/main.js"]
+# 9. RUNTIME: Switch to the api directory so paths are local
+WORKDIR /app/apps/api
+
+# Now paths are relative to /app/apps/api
+CMD ["sh", "-c", "prisma migrate deploy --schema=./prisma/schema.prisma && node ./dist/main.js"]
