@@ -27,7 +27,7 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 COPY . .
 
 # 6. Manual Generate - Using a relative path that we just verified
-RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
+RUN npx prisma generate --schema=apps/api/prisma/schema.prisma --no-engine-config
 
 # 7. Build
 RUN pnpm run build:api
