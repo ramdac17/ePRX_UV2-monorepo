@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": ["jest"],      // enable Jest globals
+    "types": ["node", "jest"],     // enable Jest globals
     "module": "CommonJS"
   },
   "include": ["src/**/*.spec.ts", "src/**/*.test.ts"]
