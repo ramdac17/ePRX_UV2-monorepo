@@ -10,29 +10,38 @@ import {
   Body,
   Delete,
   UseGuards,
-  Request as NestRequest,
+  Request as ReqDecorator,
   UnauthorizedException,
+  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
-import type { Request } from 'express'; // Keep only this for the type
-import { UserService } from './user.service.js'; // Removed .js for standard TS
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js'; // Removed .js
+import { UserService } from './user.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AuthenticatedUser } from './user.interface';
 
+// DTO for updating user profile
+export class UpdateUserProfileDto {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  mobile?: string;
+  // add other profile fields as needed
+}
+
+// --- Controller ---
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  /** DELETE: Remove user account (authenticated user only) */
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  // FIX: Type 'req' as 'Request' and use 'NestRequest' decorator alias to avoid conflict
-  async remove(@Param('id') id: string, @NestRequest() req: Request) {
-    // Safety check: Ensure the authenticated user matches the target ID
-    // Note: Passport attaches the user to req.user. We cast to 'any' for quick access
-    const user = req.user as any;
-    if (user.id !== id) {
-      throw new UnauthorizedException('PURGE_DENIED: UNAUTHORIZED_TARGET');
+  async remove(@Param('id') id: string, @Req() req: Express.Request) {
+    const user = req.user as AuthenticatedUser | undefined;
+    if (!user || user.id !== id) {
+      throw new UnauthorizedException('PURGE_DENIED');
     }
 
     await this.userService.purgeAccount(id);
@@ -42,9 +51,11 @@ export class UserController {
     };
   }
 
+  /** GET: Fetch user profile by ID */
   @Get('profile')
   async getProfile(@Query('id') id: string) {
     if (!id) throw new BadRequestException('User ID is required');
+
     const user = await this.userService.findUserById(id);
     return {
       firstName: user.firstName,
@@ -56,20 +67,20 @@ export class UserController {
     };
   }
 
+  /** POST: Upload user profile image */
   @Post(':id/upload-image')
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
         destination: join(process.cwd(), 'uploads'),
-        filename: (req, file, callback) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
+        filename: (_, file, callback) => {
+          const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
           const ext = extname(file.originalname);
           callback(null, `image-${uniqueSuffix}${ext}`);
         },
       }),
-      fileFilter: (req, file, callback) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+      fileFilter: (_, file, callback) => {
+        if (!file.mimetype?.match(/\/(jpg|jpeg|png)$/)) {
           return callback(
             new BadRequestException('Only image files are allowed!'),
             false,
@@ -81,15 +92,14 @@ export class UserController {
   )
   async uploadFile(
     @Param('id') id: string,
-    // Express.Multer.File is the correct type here
-    @UploadedFile() file: Express.Multer.File | undefined,
-    @Body() body: any,
+    @UploadedFile() file?: Express.Multer.File,
+    @Body() body?: UpdateUserProfileDto,
   ) {
-    const imagePath = file ? file.filename : undefined;
+    const imagePath = file?.filename;
 
     const updatedUser = await this.userService.updateProfile(
       id,
-      body,
+      body ?? {},
       imagePath,
     );
 

@@ -14,8 +14,8 @@ import { ActivitiesModule } from './activities/activities.module.js';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ 
-      isGlobal: true, 
+    ConfigModule.forRoot({
+      isGlobal: true,
     }),
     // ONLY ONE ServeStaticModule is needed
     ServeStaticModule.forRoot({
@@ -24,12 +24,12 @@ import { ActivitiesModule } from './activities/activities.module.js';
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
       // This allows the browser to view the files directly
-      exclude: ['/api/(.*)'], 
+      exclude: ['/api/(.*)'],
     }),
     EventsModule,
     MailModule,
     AuthModule,
-    PrismaModule, 
+    PrismaModule,
     ArticlesModule,
     UserModule,
     ActivitiesModule,

@@ -52,3 +52,10 @@ yarn-error.log*
 
 # Local Uploads (Avoid backing up user-uploaded test images)
 apps/api/uploads/avatars/*
+
+# ignore build artifacts
+*.tsbuildinfo
+dist
+node_modules
+packages/**/src/*.js
+packages/**/src/*.js.map

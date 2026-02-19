@@ -29,13 +29,13 @@ jobs:
           cache: 'pnpm'
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma Client
         run: pnpm prisma generate --schema=apps/api/prisma/schema.prisma
 
       - name: Run Unit Tests
-        run: pnpm --filter api test
+        run: pnpm --filter api exec jest --config apps/api/jest.config.ts
 
       - name: Run Lint
         run: pnpm --filter api lint
