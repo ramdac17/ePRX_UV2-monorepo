@@ -41,4 +41,6 @@ EXPOSE 3000
 # 9. RUNTIME
 WORKDIR /app/apps/api
 RUN ls -R
-CMD ["pnpm", "start:prod"]
+
+# Add this line to start your NestJS app
+CMD ["node", "dist/main.js"]
