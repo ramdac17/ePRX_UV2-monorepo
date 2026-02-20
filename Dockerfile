@@ -31,6 +31,7 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 COPY . .
 
 # 7. MANUALLY Generate Prisma Client
+RUN ln -s /app/apps/api/prisma /app/prisma
 # We use npx to ensure it finds the hoisted prisma binary
 RUN cd apps/api && DATABASE_URL="postgresql://unused:unused@localhost:5432/unused" npx prisma generate
 
