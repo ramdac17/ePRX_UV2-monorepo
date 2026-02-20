@@ -18,4 +18,4 @@ WORKDIR /app/apps/api
 
 EXPOSE 3000
 
-CMD ["/bin/sh", "-c", "pnpm exec prisma migrate deploy && node dist/main.js"]
+CMD ["npm", "run", "start:railway"]
