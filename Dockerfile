@@ -39,8 +39,8 @@ RUN pnpm --filter api run build
 EXPOSE 3000
 
 # 9. RUNTIME
-WORKDIR /app/apps/api
+WORKDIR /app
 RUN ls -R
 
 # Add this line to start your NestJS app
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/apps/api/main.js"]
