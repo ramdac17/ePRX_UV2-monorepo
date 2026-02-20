@@ -14,6 +14,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Update Corepack and Setup pnpm
+        run: |
+          npm install -g corepack@latest
+          corepack enable
+          corepack prepare pnpm@9.15.4 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -52,8 +61,12 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
+      - name: Debug Railway Identity
+        run: railway whoami
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
       - name: Deploy to Railway
-        # Using the UUID is safer than the name
-        run: railway up --service 7b91e00c-a6f6-41c8-94f4-e5927a4bab25 --detach
+        run: railway up --service a9ca2bd8-58f5-4f10-831e-64c68888d443 --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
