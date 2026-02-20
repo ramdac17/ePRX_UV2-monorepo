@@ -38,7 +38,7 @@ RUN cd apps/api && DATABASE_URL="postgresql://unused:unused@localhost:5432/unuse
 
 # 8. Build the API
 RUN pnpm --filter api run build
-
+RUN cd apps/api && npx prisma generate --schema=./prisma/schema.prisma
 EXPOSE 3000
 
 # 9. RUNTIME
