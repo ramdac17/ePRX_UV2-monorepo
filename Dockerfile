@@ -15,7 +15,7 @@ ENV pnpm_config_ignore_scripts=true
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/ ./packages/
-COPY apps/api/prisma ./prisma
+COPY apps/api/prisma ./apps/api/prisma
 
 # 3. CRITICAL: Physically copy the Prisma folder specifically 
 # This ensures Docker "sees" the file before we install anything
