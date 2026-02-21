@@ -28,11 +28,8 @@ RUN pnpm --filter api build
 EXPOSE 3000
 
 # ===== Runtime command =====
-# 1. cd into monorepo root
-# 2. Run Prisma migrations
-# 3. Start Nest app from correct build path
 CMD cd apps/api && \
-    echo "Starting API...................." && \
+    echo "Starting API..." && \
     pnpm exec prisma migrate deploy && \
-    echo "Running Nest..................." && \
-    node dist/src/main.js
+    echo "Running Nest..." && \
+    node dist/apps/api/src/main.js
