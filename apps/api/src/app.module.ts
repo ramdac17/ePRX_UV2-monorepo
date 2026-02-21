@@ -11,6 +11,7 @@ import { join } from 'path'; // Removed dirname as we'll use process.cwd()
 import { ConfigModule } from '@nestjs/config';
 import { EventsModule } from './events/events.module.js';
 import { ActivitiesModule } from './activities/activities.module.js';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -34,7 +35,7 @@ import { ActivitiesModule } from './activities/activities.module.js';
     UserModule,
     ActivitiesModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [AppService],
 })
 export class AppModule {}
