@@ -1,7 +1,7 @@
 import { defineConfig } from 'prisma/config';
 
 export default defineConfig({
-  schema: './apps/api/prisma/schema.prisma', // ✅ correct from monorepo root
+  schema: './prisma/schema.prisma', // ✅ always relative to apps/api
   datasource: {
     url: process.env.DATABASE_URL,
   },
