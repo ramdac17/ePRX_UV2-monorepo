@@ -31,7 +31,8 @@ EXPOSE 3000
 # 1. cd into monorepo root
 # 2. Run Prisma migrations
 # 3. Start Nest app from correct build path
-CMD echo "Starting API..." && \
-    pnpm --filter api exec prisma migrate deploy && \
-    echo "Running Nest..." && \
-    node dist/apps/api/main.js
+CMD cd apps/api && \
+    echo "Starting API...................." && \
+    pnpm exec prisma migrate deploy && \
+    echo "Running Nest..................." && \
+    node dist/src/main.js
