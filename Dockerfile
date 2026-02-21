@@ -11,33 +11,27 @@ RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 WORKDIR /app
 
 # ===== Copy monorepo files =====
-# We copy the workspace config first to leverage Docker layer caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-
-# CRITICAL: We MUST copy packages/ because apps/api depends on @repo/types
 COPY packages ./packages
 COPY apps/api ./apps/api
 
 # ===== Install dependencies =====
 RUN pnpm install --frozen-lockfile
 
-# ===== Generate Prisma client & Build API =====
-# 'api...' builds the api AND all its local workspace dependencies in order
+# ===== Generate Prisma client =====
 RUN pnpm --filter api exec prisma generate
-RUN pnpm --filter api... build
 
-# ===== Set working directory for runtime =====
-# Keeping this as /app so paths to dist/apps/api are predictable
-WORKDIR /app
+# ===== Build API =====
+RUN pnpm --filter api build
 
 # ===== Expose port =====
 EXPOSE 3000
 
 # ===== Runtime command =====
-# We use the explicit path to the built main.js discovered earlier
-# CMD ["/bin/sh", "-c", "pnpm --filter api exec prisma migrate deploy --schema=apps/api/prisma/schema.prisma && node dist/apps/api/main.js"]
-CMD cd /app && \
-    echo "Starting API..." && \
+# 1. cd into monorepo root
+# 2. Run Prisma migrations
+# 3. Start Nest app from correct build path
+CMD echo "Starting API..." && \
     pnpm --filter api exec prisma migrate deploy && \
     echo "Running Nest..." && \
     node dist/apps/api/main.js
