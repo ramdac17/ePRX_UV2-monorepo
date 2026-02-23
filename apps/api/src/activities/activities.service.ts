@@ -5,6 +5,12 @@ import { PrismaService } from '../prisma.service.js';
 export class ActivitiesService {
   constructor(private prisma: PrismaService) {}
 
+  async findAll(userId: string) {
+    return this.prisma.activity.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
   async getDashboardStats(userId: string) {
     const activities = await this.prisma.activity.findMany({
       where: { userId },

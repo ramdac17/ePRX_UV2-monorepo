@@ -7,5 +7,6 @@ import { PrismaModule } from '../prisma.module.js';
   imports: [PrismaModule],
   controllers: [ActivitiesController],
   providers: [ActivitiesService],
+  exports: [ActivitiesService],
 })
 export class ActivitiesModule {}

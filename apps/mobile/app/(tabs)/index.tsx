@@ -15,6 +15,7 @@ import api from "@/utils/api";
 import { CYBER_THEME } from "@/constants/Colors";
 import { useRouter } from "expo-router";
 import { User, Activity, Lock, Play } from "lucide-react-native";
+import { useFocusEffect } from "expo-router";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -99,6 +100,13 @@ export default function TabOneScreen() {
     initializeCore();
   }, []);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchProfile();
+      fetchStats();
+    }, []),
+  );
+
   const fetchStats = async () => {
     try {
       const response = await api.get("/activities/stats");
@@ -131,6 +139,10 @@ export default function TabOneScreen() {
     try {
       const res = await api.get("/auth/profile");
       setUser(res.data);
+      console.log(
+        "DASHBOARD_IMAGE_PATH:",
+        `${BASE_IMAGE_URL}${res.data.image}`,
+      );
     } catch (e) {
       console.error("DASHBOARD_PROFILE_ERROR", e);
     }
@@ -153,7 +165,7 @@ export default function TabOneScreen() {
           <View style={styles.header}>
             <View style={{ flex: 1 }}>
               <Text style={styles.glitchText}>Welcome back,</Text>
-              <Text style={[styles.glitchText, { fontSize: 24 }]}>
+              <Text style={[styles.glitchTextOpearative, { fontSize: 24 }]}>
                 {user?.firstName?.toUpperCase() || "OPERATIVE"}
               </Text>
               <Text style={styles.subTitle}>ePRX_UV1 // DASHBOARD_ACCESS</Text>
@@ -164,7 +176,11 @@ export default function TabOneScreen() {
             >
               {user?.image ? (
                 <Image
-                  source={{ uri: `${BASE_IMAGE_URL}${user.image}` }}
+                  source={{
+                    uri: user.image?.startsWith("http")
+                      ? user.image
+                      : `${BASE_IMAGE_URL}/${user.image}`.replace(/\/+/g, "/"), // This regex prevents double slashes //
+                  }}
                   style={styles.avatarCircle}
                 />
               ) : (
@@ -261,6 +277,12 @@ const styles = StyleSheet.create({
   container: { padding: 20, paddingTop: 60 },
   header: { flexDirection: "row", alignItems: "center", marginBottom: 30 },
   glitchText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
+  glitchTextOpearative: {
     color: CYBER_THEME.primary,
     fontSize: 14,
     fontWeight: "900",

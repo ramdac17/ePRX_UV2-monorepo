@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Home, User, Cog } from "lucide-react-native";
+import { Home, User, Cog, Activity } from "lucide-react-native";
 import { CYBER_THEME } from "@/constants/Colors";
 
 export default function TabLayout() {
@@ -41,6 +41,14 @@ export default function TabLayout() {
         options={{
           title: "CONFIG",
           tabBarIcon: ({ color }) => <Cog size={24} color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="history"
+        options={{
+          title: "History",
+          tabBarIcon: ({ color }) => <Activity color={color} size={24} />,
         }}
       />
     </Tabs>
