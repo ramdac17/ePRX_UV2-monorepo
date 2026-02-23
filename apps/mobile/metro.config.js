@@ -19,6 +19,13 @@ config.transformer = {
   _expoRelativeProjectRoot: projectRoot,
 };
 
+config.resolver.resolverMainFields = [
+  "react-native",
+  "browser",
+  "module",
+  "main",
+];
+
 // Keep this for the 'canonicalize' fix we did earlier
 config.resolver.unstable_enablePackageExports = false;
 
