@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "40dd958f-3cd6-4210-aabd-196a693b9b9d"
+      }
+    },
+    "android": {
+      "package": "com.ramdac17.eprx_uv1monorepo"
+    }
+  }
+}
