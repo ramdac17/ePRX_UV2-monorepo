@@ -7,7 +7,6 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  register: any;
   constructor(
     private prisma: PrismaService,
     private userService: UserService,
@@ -61,6 +60,49 @@ export class AuthService {
   }
 
   // ... (validateUser, register, verifyEmail remain the same) ...
+
+  async register(registerDto: any) {
+    const { email, password, username, firstName, lastName, mobile } =
+      registerDto;
+
+    // 1. Check if user already exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new UnauthorizedException('USER_ALREADY_EXISTS');
+    }
+
+    // 2. Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 3. Create the user in the database
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        username,
+        firstName,
+        lastName,
+        mobile,
+        password: hashedPassword,
+        // image: '', // Optional: set a default if needed
+      },
+    });
+
+    // 4. Generate JWT for immediate login after registration
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      username: user.username,
+    };
+
+    const { password: _, ...result } = user;
+    return {
+      user: result,
+      access_token: this.jwtService.sign(payload),
+    };
+  }
 
   async updateUserImage(userId: string, imagePath: string) {
     // We await and return the result to ensure the controller gets the updated record
