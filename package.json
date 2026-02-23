@@ -16,6 +16,7 @@
     "start:railway": "npx prisma migrate deploy && node dist/apps/api/main.js"
   },
   "devDependencies": {
+    "metro-core": "0.84.0",
     "prettier": "^3.7.4",
     "turbo": "^2.8.1",
     "typescript": "5.9.2"
