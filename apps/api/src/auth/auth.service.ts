@@ -1,13 +1,13 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma.service.js';
 import { UserService } from '../user/user.service.js';
-import { MailService } from '../mail/mail.service.js'; 
+import { MailService } from '../mail/mail.service.js';
 import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
+  register: any;
   constructor(
     private prisma: PrismaService,
     private userService: UserService,
@@ -20,11 +20,17 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
-    
+
     if (!user) throw new UnauthorizedException('USER_NOT_FOUND');
 
     // Remove sensitive data before returning
-    const { password, resetToken, resetTokenExpires, verificationToken, ...result } = user;
+    const {
+      password,
+      resetToken,
+      resetTokenExpires,
+      verificationToken,
+      ...result
+    } = user;
     return result; // This now includes 'image' naturally
   }
 
@@ -39,10 +45,10 @@ export class AuthService {
       throw new UnauthorizedException('ACCESS_DENIED: Invalid Credentials');
     }
 
-    const payload = { 
-      sub: user.id, 
+    const payload = {
+      sub: user.id,
       email: user.email,
-      username: user.username 
+      username: user.username,
     };
 
     // Ensure 'image' is included in the initial login response
@@ -50,7 +56,7 @@ export class AuthService {
 
     return {
       user: result,
-      access_token: this.jwtService.sign(payload), 
+      access_token: this.jwtService.sign(payload),
     };
   }
 
@@ -60,8 +66,8 @@ export class AuthService {
     // We await and return the result to ensure the controller gets the updated record
     return await this.prisma.user.update({
       where: { id: userId },
-      data: { 
-        image: imagePath 
+      data: {
+        image: imagePath,
       },
     });
   }

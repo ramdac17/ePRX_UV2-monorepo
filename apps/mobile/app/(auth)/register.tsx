@@ -45,7 +45,7 @@ export default function RegisterScreen() {
       console.log("📡 SENDING_RECRUIT_DATA:", registrationData);
 
       // 2. Single source of truth for the API call
-      await axios.post(`${API_URL}/auth/register`, registrationData);
+      await axios.post(`${API_URL}/api/auth/register`, registrationData);
 
       alert("REGISTRATION_SUCCESS: PROCEED_TO_LOGIN");
       router.replace("/login");

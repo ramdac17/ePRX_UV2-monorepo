@@ -1,12 +1,17 @@
-import { Response } from 'express';
-import crypto from 'crypto';
 import { AuthService } from './auth.service.js';
-import { JwtAuthGuard } from './guards/jwt-auth.guard.js'; 
-import { Request as ExpressRequest } from 'express';
-import { 
-  Controller, Post, UseGuards, UseInterceptors, UploadedFile, Request, 
-  BadRequestException, Get, Query, HttpCode, Res, Body,
-  HttpStatus
+import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  Request,
+  BadRequestException,
+  Get,
+  HttpCode,
+  Body,
+  HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -15,7 +20,7 @@ import 'multer';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService) {}
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -31,7 +36,19 @@ export class AuthController {
     }
   }
 
-  // ... (register, verify-email, forgot-password remain the same) ...
+  @Post('register')
+  async register(@Body() registerDto: any) {
+    console.log('--- [ePRX_UV1] REGISTRATION_ATTEMPT ---', registerDto.email);
+    try {
+      const result = await this.authService.register(registerDto);
+      console.log(`--- [ePRX_UV1] REG_SUCCESS: ${registerDto.email} ---`);
+      return result;
+    } catch (error: any) {
+      console.error('--- [ePRX_UV1] REG_FAILURE ---', error.message);
+      // NestJS will automatically send the right status code if authService throws a ConflictException or similar
+      throw error;
+    }
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
@@ -39,7 +56,7 @@ export class AuthController {
     // CRITICAL FIX: Don't just return req.user (it's only JWT data).
     // Use the service to fetch the LATEST data from the DB, including the image!
     // Note: Use 'userId' or 'sub' or 'id' depending on your JwtStrategy (usually sub or id)
-    const userId = req.user.id || req.user.sub; 
+    const userId = req.user.id || req.user.sub;
     return this.authService.getProfile(userId);
   }
 
@@ -50,13 +67,19 @@ export class AuthController {
       storage: diskStorage({
         destination: './uploads/avatars',
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           cb(null, `avatar-${uniqueSuffix}${extname(file.originalname)}`);
         },
       }),
       fileFilter: (req, file, cb) => {
         if (!file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
-          return cb(new BadRequestException('Only image files (jpg, jpeg, png) are allowed!'), false);
+          return cb(
+            new BadRequestException(
+              'Only image files (jpg, jpeg, png) are allowed!',
+            ),
+            false,
+          );
         }
         cb(null, true);
       },
@@ -76,11 +99,13 @@ export class AuthController {
       return {
         success: true,
         message: 'IDENTITY_IMAGE_SYNCED',
-        url: filePath
+        url: filePath,
       };
     } catch (error) {
       console.error('--- [ePRX_UV1] DB_UPDATE_FAILED ---', error);
-      throw new BadRequestException('Failed to update user profile image in database.');
+      throw new BadRequestException(
+        'Failed to update user profile image in database.',
+      );
     }
-  } 
+  }
 }
