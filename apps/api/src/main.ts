@@ -25,8 +25,8 @@ async function bootstrap() {
     origin: [
       'http://localhost:3000',
       'http://localhost:5173',
-      'http://127.0.0.1:3000',
-      'http://192.168.0.152:3000',
+      'https://eprxuv1-monorepo-production.up.railway.app', // <-- ADD YOUR RAILWAY WEB URL HERE
+      /\.railway\.app$/, // This regex allows ANY subdomain on railway.app (very helpful for testing)
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,

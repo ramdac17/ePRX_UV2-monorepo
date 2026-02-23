@@ -6,15 +6,17 @@ const workspaceRoot = path.resolve(projectRoot, "../..");
 
 const config = getDefaultConfig(projectRoot);
 
-// Force Metro to resolve the "browser" version of packages
-// This prevents Axios from trying to load the "node" version with 'crypto'
-config.resolver.resolverMainFields = ["react-native", "browser", "main"];
-
-// Ensure Metro watches the workspace root for @repo/types
+// Force Metro to prioritize the local node_modules
 config.watchFolders = [workspaceRoot];
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),
   path.resolve(workspaceRoot, "node_modules"),
 ];
+
+// Re-direct native-specific modules to the local copy
+config.resolver.extraNodeModules = {
+  "react-native": path.resolve(projectRoot, "node_modules/react-native"),
+  react: path.resolve(projectRoot, "node_modules/react"),
+};
 
 module.exports = config;

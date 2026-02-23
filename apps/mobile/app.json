@@ -2,7 +2,12 @@
   "expo": {
     "name": "ePRX UV1",
     "slug": "eprx-uv1-monorepo",
-    "scheme": "eprx",
+    "scheme": "eprx-uv1",
+    "extra": {
+      "router": {
+        "origin": false
+      }
+    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

@@ -17,11 +17,11 @@ export class HealthController {
         project: 'ePRX UV1',
       };
     } catch (e) {
-      return {
-        status: 'error',
-        database: 'disconnected',
-        message: e.message,
-      };
+      if (e instanceof Error) {
+        console.log(e.message);
+      } else {
+        console.log('An unknown error occurred');
+      }
     }
   }
 }

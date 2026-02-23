@@ -1,13 +1,13 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "module": "CommonJS",
-    "moduleResolution": "Node",
+    "module": "Node16",
+    "moduleResolution": "Node16",
     "target": "ES2022",
     "outDir": "../../dist/apps/api",
     "baseUrl": "./",
     "paths": {
-      "@repo/types": ["../../packages/types/src/index"] 
+      "@repo/types": ["../../packages/types/src"] 
     },
     "types": ["node", "jest"],
     "esModuleInterop": true,
@@ -19,7 +19,9 @@
     "sourceMap": true,
     "declaration": true,
     "noEmit": false,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "src/**/*.ts",

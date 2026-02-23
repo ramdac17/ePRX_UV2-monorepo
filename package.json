@@ -1,18 +1,19 @@
 {
-  "name": "eprx-uv1-monorepo",
+  "name": "eprx_uv1-monorepo",
   "private": true,
   "packageManager": "pnpm@9.15.4",
   "engines": {
     "node": ">=22.12.0"
   },
   "scripts": {
+    "db:studio": "prisma studio --url $(grep DATABASE_URL apps/api/.env | cut -d '=' -f2 | sed 's/\"//g')",
     "dev": "node scripts/update-ip.js && turbo run dev",
-    "build": "nest build --path ./tsconfig.json",
+    "build": "turbo run build",
     "build:api": "turbo run build --filter=api",
     "sync-ip": "node scripts/update-ip.js",
-    "start:api": "node apps/api/dist/main.js",
-    "postinstall": "pnpm --filter api prisma generate",
-    "start:railway": "npx prisma migrate deploy --schema=./prisma/schema.prisma && node dist/main.js"
+    "start:api": "node dist/apps/api/main.js",
+    "postinstall": "prisma generate --schema=apps/api/prisma/schema.prisma",
+    "start:railway": "npx prisma migrate deploy && node dist/apps/api/main.js"
   },
   "devDependencies": {
     "prettier": "^3.7.4",
@@ -26,7 +27,16 @@
         "react-dom",
         "@types/react"
       ]
-    }
+    },
+    "overrides": {
+      "react": "19.1.0",
+      "react-dom": "19.1.0",
+      "react-native": "0.81.5",
+      "react-native-svg": "15.12.1"
+    },
+    "neverBuiltDependencies": [
+      "sharp"
+    ]
   },
   "dependencies": {
     "@prisma/client": "^7.3.0",
