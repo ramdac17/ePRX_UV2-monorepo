@@ -1,23 +1,29 @@
 import axios from "axios";
 import { getToken } from "./authStorage";
 
-const API_URL = "http://192.168.0.152:3000/api"; // Use your machine's IP
+// Use the environment variable, but fallback to Railway URL if it's missing
+const baseURL =
+  process.env.EXPO_PUBLIC_API_URL ||
+  "https://eprxuv1-monorepo-production.up.railway.app/api";
 
 const api = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL,
-  timeout: 15000, // Increase to 15s for spotty LTE data
+  baseURL: baseURL,
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
     "Bypass-Tunnel-Reminder": "true",
-
-    "ngrok-skip-browser-warning": "true", // In case you switch back to Ngrok
+    "ngrok-skip-browser-warning": "true",
   },
 });
 
 api.interceptors.request.use(async (config) => {
-  const token = await getToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  try {
+    const token = await getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (e) {
+    console.error("TOKEN_RETRIEVAL_ERROR", e);
   }
   return config;
 });
