@@ -1,7 +1,9 @@
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getCrashLogs, logCrash } from "@/utils/crashLogger";
+import { CrashBoundary } from "@/components/CrashBoundary";
 
 const MyCyberTheme = {
   ...DarkTheme,
@@ -10,7 +12,7 @@ const MyCyberTheme = {
     background: "#050505",
     card: "#050505",
     text: "#FFFFFF",
-    primary: "#00F0FF", // Neon Cyan
+    primary: "#00F0FF",
     border: "rgba(0, 240, 255, 0.3)",
   },
 };
@@ -20,48 +22,83 @@ export default function RootLayout() {
   const router = useRouter();
   const [isAuthLoaded, setIsAuthLoaded] = useState(false);
   const [hasToken, setHasToken] = useState(false);
+  const crashQueue = useRef<any[]>([]); // Queue for crashes before router ready
 
-  // 1. Initial Auth Check & Observer
+  // --- Safe Global crash handler ---
+  useEffect(() => {
+    const originalHandler = (global as any).ErrorUtils?.getGlobalHandler?.();
+
+    (global as any).ErrorUtils?.setGlobalHandler?.(
+      async (error: any, isFatal: boolean) => {
+        logCrash(error);
+        originalHandler?.(error, isFatal);
+
+        const logs = await getCrashLogs();
+        if (!logs?.length) return;
+
+        // If router is ready, navigate immediately
+        if (segments.length > 0) {
+          router.push("debug/crash-logs" as any);
+        } else {
+          // Queue it until router is ready
+          crashQueue.current.push(true);
+        }
+      },
+    );
+  }, []);
+
+  // Process crash queue once auth check & router ready
+  useEffect(() => {
+    if (!isAuthLoaded) return;
+    if (crashQueue.current.length > 0) {
+      router.push("debug/crash-logs" as any);
+      crashQueue.current = [];
+    }
+  }, [isAuthLoaded, segments]);
+
+  // --- Initial Auth Check ---
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
         setHasToken(!!token);
-      } catch (e) {
+      } catch {
         setHasToken(false);
       } finally {
         setIsAuthLoaded(true);
       }
     };
     checkAuth();
-  }, [segments]); // Re-run check whenever the user moves between screens
+  }, [segments]);
 
-  // 2. Navigation Guard logic
+  // --- Navigation Guard ---
   useEffect(() => {
-    // Wait until we actually know if the user has a token
     if (!isAuthLoaded) return;
 
     const inAuthGroup = segments[0] === "(auth)";
 
     if (!hasToken && !inAuthGroup) {
-      // Not logged in -> Kick to login
       router.replace("/login");
     } else if (hasToken && inAuthGroup) {
-      // Logged in -> Move to dashboard
       router.replace("/(tabs)");
     }
   }, [hasToken, isAuthLoaded, segments]);
 
-  // 3. Prevent flickering while checking auth
   if (!isAuthLoaded) return null;
 
   return (
-    <ThemeProvider value={MyCyberTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-      </Stack>
-    </ThemeProvider>
+    <CrashBoundary>
+      <ThemeProvider value={MyCyberTheme}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+          <Stack.Screen
+            name="debug/crash-logs"
+            options={{ presentation: "modal" }}
+          />
+        </Stack>
+      </ThemeProvider>
+    </CrashBoundary>
   );
 }

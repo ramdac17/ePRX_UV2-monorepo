@@ -1,12 +1,16 @@
 {
   "expo": {
-    "extra": {
-      "eas": {
-        "projectId": "40dd958f-3cd6-4210-aabd-196a693b9b9d"
-      }
-    },
+    "name": "ePRX",
+    "slug": "eprx",
+    "version": "1.0.0",
     "android": {
       "package": "com.ramdac17.eprx_uv1monorepo"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3db30c6e-ae9f-4a14-9fd8-718410a98e6f"
+      }
+    },
+    "owner": "ramdac17"
   }
 }
