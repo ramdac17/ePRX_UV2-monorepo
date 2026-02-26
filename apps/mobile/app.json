@@ -3,27 +3,16 @@
     "name": "ePRX UV1",
     "slug": "eprx-uv1-monorepo",
     "scheme": "eprx-uv1",
-    "extra": {
-      "router": {
-        "origin": false
-      },
-      "eas": {
-        "projectId": "7f52b4c3-6e47-4dce-b946-831c55d4620a"
-      }
-    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
+    "newArchEnabled": true,          // ✅ Enable new architecture
+    "jsEngine": "hermes",            // ✅ Hermes required for new arch
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
-    },
-    "ios": {
-      "bundleIdentifier": "com.eprx.uv1",
-      "supportsTablet": true
     },
     "android": {
       "package": "com.eprx.uv1",
@@ -38,26 +27,27 @@
             "scheme": "eprx",
             "host": "verify-success"
           },
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.eprx.uv1",
+      "supportsTablet": true
     },
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": [
-      "expo-router",
-      "expo-font",
-      "expo-secure-store"
-    ],
+    "plugins": ["expo-router", "expo-font", "expo-secure-store"],
     "experiments": {
       "typedRoutes": true
     },
-    "owner": "ramdac17"
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_EXPO_PROJECT_ID_HERE"
+      }
+    }
   }
 }
