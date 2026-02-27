@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
-import MapView, { Polyline, PROVIDER_GOOGLE } from "react-native-maps";
+//import MapView, { Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import { useLocalSearchParams } from "expo-router";
-import api from "@/utils/api";
+//import api from "@/utils/api";
 
 export default function ActivityDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -10,8 +10,8 @@ export default function ActivityDetailScreen() {
 
   useEffect(() => {
     const fetchDetail = async () => {
-      const res = await api.get(`/activities/${id}`);
-      setActivity(res.data);
+      //    const res = await api.get(`/activities/${id}`);
+      //    setActivity(res.data);
     };
     fetchDetail();
   }, [id]);
@@ -23,7 +23,7 @@ export default function ActivityDetailScreen() {
     latitude: p.latitude,
     longitude: p.longitude,
   }));
-
+  /* 
   return (
     <View style={styles.container}>
       <MapView
@@ -44,6 +44,7 @@ export default function ActivityDetailScreen() {
       </MapView>
     </View>
   );
+   */
 }
 
 const styles = StyleSheet.create({
