@@ -4,41 +4,10 @@
     "slug": "eprx-uv1-monorepo",
     "scheme": "eprx-uv1",
     "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "userInterfaceStyle": "dark",
-    "newArchEnabled": true,          // ✅ Enable new architecture
-    "jsEngine": "hermes",            // ✅ Hermes required for new arch
-    "splash": {
-      "image": "./assets/images/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#000000"
-    },
+    "owner": "ramdac17", 
+    "jsEngine": "hermes",
     "android": {
-      "package": "com.eprx.uv1",
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#000000"
-      },
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "data": {
-            "scheme": "eprx",
-            "host": "verify-success"
-          },
-          "category": ["BROWSABLE", "DEFAULT"]
-        }
-      ]
-    },
-    "ios": {
-      "bundleIdentifier": "com.eprx.uv1",
-      "supportsTablet": true
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "package": "com.eprx.uv1"
     },
     "plugins": ["expo-router", "expo-font", "expo-secure-store"],
     "experiments": {
