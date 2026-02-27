@@ -1,18 +1,11 @@
 import { Buffer } from "buffer";
 import { TextEncoder, TextDecoder } from "text-encoding";
 
-// 1. Set Globals
 global.Buffer = Buffer;
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
 
-if (typeof global.TextEncoder === "undefined") {
-  global.TextEncoder = TextEncoder;
-}
-
-if (typeof global.TextDecoder === "undefined") {
-  global.TextDecoder = TextDecoder;
-}
-
-// 2. Apply URL Polyfill (Depends on TextDecoder being ready)
+// Important: setup URL polyfill after encoders are global
 import "react-native-url-polyfill/auto";
 
-console.log("🚀 ePRX UV1: All Globals Initialized");
+console.log("🚀 ePRX UV1: Global Engine Primed");
