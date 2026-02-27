@@ -179,7 +179,10 @@ export default function TabOneScreen() {
                   source={{
                     uri: user.image?.startsWith("http")
                       ? user.image
-                      : `${BASE_IMAGE_URL}/${user.image}`.replace(/\/+/g, "/"), // This regex prevents double slashes //
+                      : `${BASE_IMAGE_URL}/${user.image}`.replace(
+                          /([^:]\/)\/+/g,
+                          "$1",
+                        ), // This regex prevents double slashes //
                   }}
                   style={styles.avatarCircle}
                 />

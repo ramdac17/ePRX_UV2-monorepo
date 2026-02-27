@@ -1,3 +1,11 @@
+// @ts-ignore
+declare module "text-encoding";
+import "react-native-url-polyfill/auto";
+import { TextEncoder, TextDecoder } from "text-encoding";
+if (typeof (global as any).TextDecoder === "undefined") {
+  (global as any).TextDecoder = TextDecoder;
+  (global as any).TextEncoder = TextEncoder;
+}
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
