@@ -11,16 +11,12 @@
     "build": "turbo run build",
     "build:api": "turbo run build --filter=api",
     "sync-ip": "node scripts/update-ip.js",
-    "start:api": "node dist/apps/api/main.js",
     "postinstall": "prisma generate --schema=apps/api/prisma/schema.prisma",
     "start:railway": "npx prisma migrate deploy && node dist/apps/api/main.js",
-    "android": "expo run:android",
-    "ios": "expo run:ios"
+    "android": "turbo run android",
+    "ios": "turbo run ios"
   },
   "devDependencies": {
-    "metro": "0.76.9",
-    "metro-config": "0.76.9",
-    "metro-core": "0.76.9",
     "prettier": "^3.7.4",
     "turbo": "^2.8.1",
     "typescript": "5.9.2"
@@ -35,21 +31,13 @@
     },
     "overrides": {
       "react": "19.1.0",
-      "react-dom": "19.1.0",
-      "react-native": "0.81.5",
-      "react-native-svg": "15.12.1"
-    },
-    "neverBuiltDependencies": [
-      "sharp"
-    ]
+      "react-native": "0.81.5"
+    }
   },
   "dependencies": {
     "@prisma/client": "^7.3.0",
     "cross-env": "^7.0.3",
-    "prisma": "^7.3.0",
-    "expo": "~54.0.33",
-    "react": "19.1.0",
-    "react-native": "0.81.5"
+    "prisma": "^7.3.0"
   },
   "prisma": {
     "schema": "apps/api/prisma/schema.prisma"
