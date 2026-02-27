@@ -1,21 +1,4 @@
-// 1. The very first line (Absolute priority)
 import "../polyfills";
-
-// 2. Typescript ignore
-// @ts-ignore
-declare module "text-encoding";
-
-// 3. Import the encoders
-import { TextEncoder, TextDecoder } from "text-encoding";
-
-// 4. ASSIGN THEM TO GLOBAL FIRST
-if (typeof (global as any).TextDecoder === "undefined") {
-  (global as any).TextDecoder = TextDecoder;
-  (global as any).TextEncoder = TextEncoder;
-}
-
-// 5. NOW AND ONLY NOW run the URL polyfill
-import "react-native-url-polyfill/auto";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";

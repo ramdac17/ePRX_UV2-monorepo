@@ -7,10 +7,10 @@
   },
   "scripts": {
     "db:studio": "prisma studio --url $(grep DATABASE_URL apps/api/.env | cut -d '=' -f2 | sed 's/\"//g')",
-    "dev": "node scripts/update-ip.js && turbo run dev",
+    "dev": "turbo run dev",
     "build": "turbo run build",
     "build:api": "turbo run build --filter=api",
-    "sync-ip": "node scripts/update-ip.js",
+    "sync-ip": "echo 'Script missing'",
     "postinstall": "prisma generate --schema=apps/api/prisma/schema.prisma",
     "start:railway": "npx prisma migrate deploy && node dist/apps/api/main.js",
     "android": "turbo run android",
