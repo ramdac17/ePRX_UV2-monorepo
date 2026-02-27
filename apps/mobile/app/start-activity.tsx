@@ -14,7 +14,7 @@ import { getDistance } from "geolib";
 import api from "@/utils/api";
 import { CYBER_THEME } from "@/constants/Colors";
 import { Play, Pause, Square, ArrowLeft } from "lucide-react-native";
-import MapView, { Polyline, PROVIDER_GOOGLE } from "react-native-maps";
+// import MapView, { Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 
 export default function StartActivity() {
   const router = useRouter();
@@ -172,7 +172,7 @@ export default function StartActivity() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>SAVE_ACTIVITY_LOG</Text>
-
+            {/*  
             <View style={styles.mapContainer}>
               {coords.length > 0 ? (
                 <MapView
@@ -200,7 +200,7 @@ export default function StartActivity() {
                 </View>
               )}
               <View style={styles.mapOverlayFrame} />
-            </View>
+            </View> */}
 
             <TextInput
               style={styles.input}
