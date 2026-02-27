@@ -20,31 +20,31 @@ import 'multer';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: any) {
-    console.log('--- [ePRX_UV1] LOGIN_ATTEMPT ---');
+    console.log('--- [ePRX_UV2] LOGIN_ATTEMPT ---');
     try {
       const result = await this.authService.login(loginDto);
-      console.log(`--- [ePRX_UV1] SUCCESS: ${loginDto.email} ---`);
+      console.log(`--- [ePRX_UV2] SUCCESS: ${loginDto.email} ---`);
       return result;
     } catch (error: any) {
-      console.error('--- [ePRX_UV1] FAILURE ---', error.message);
+      console.error('--- [ePRX_UV2] FAILURE ---', error.message);
       throw error;
     }
   }
 
   @Post('register')
   async register(@Body() registerDto: any) {
-    console.log('--- [ePRX_UV1] REGISTRATION_ATTEMPT ---', registerDto.email);
+    console.log('--- [ePRX_UV2] REGISTRATION_ATTEMPT ---', registerDto.email);
     try {
       const result = await this.authService.register(registerDto);
-      console.log(`--- [ePRX_UV1] REG_SUCCESS: ${registerDto.email} ---`);
+      console.log(`--- [ePRX_UV2] REG_SUCCESS: ${registerDto.email} ---`);
       return result;
     } catch (error: any) {
-      console.error('--- [ePRX_UV1] REG_FAILURE ---', error.message);
+      console.error('--- [ePRX_UV2] REG_FAILURE ---', error.message);
       // NestJS will automatically send the right status code if authService throws a ConflictException or similar
       throw error;
     }
@@ -102,7 +102,7 @@ export class AuthController {
         url: filePath,
       };
     } catch (error) {
-      console.error('--- [ePRX_UV1] DB_UPDATE_FAILED ---', error);
+      console.error('--- [ePRX_UV2] DB_UPDATE_FAILED ---', error);
       throw new BadRequestException(
         'Failed to update user profile image in database.',
       );

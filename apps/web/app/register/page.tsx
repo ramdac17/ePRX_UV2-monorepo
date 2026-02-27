@@ -60,7 +60,7 @@ const RegisterForm = () => {
         <div style={styles.formWrapper}>
           <div style={styles.header}>
             <h1 style={styles.title}>NEW RECRUIT</h1>
-            <p style={styles.subtitle}>Join the ePRX UV1 ecosystem.</p>
+            <p style={styles.subtitle}>Join the ePRX UV2 ecosystem.</p>
           </div>
 
           <form onSubmit={handleSubmit} style={styles.form}>
@@ -178,7 +178,7 @@ const RegisterForm = () => {
 
       <div style={styles.visualSide}>
         <div style={styles.overlay}>
-          <div style={styles.verticalText}>ePRX_UV1 CORE</div>
+          <div style={styles.verticalText}>ePRX_UV2 CORE</div>
           <h2 style={styles.brandingTitle}>
             THE <br />
             <span style={{ color: "#d4ff00" }}>NEXT</span> GEN

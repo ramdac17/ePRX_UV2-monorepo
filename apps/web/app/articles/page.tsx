@@ -17,7 +17,7 @@ export default function ArticlesArchivePage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ePRX UV1 Connection Logic
+  // ePRX UV2 Connection Logic
   const BACKEND_API =
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
   const STATIC_URL = BACKEND_API.replace("/api", "");

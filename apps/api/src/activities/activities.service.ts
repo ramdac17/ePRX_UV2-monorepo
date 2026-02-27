@@ -3,10 +3,10 @@ import { PrismaService } from '../prisma.service.js';
 
 @Injectable()
 export class ActivitiesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll(userId: string) {
-    console.log('--- [ePRX_UV1] FETCHING_HISTORY_FOR_USER:', userId);
+    console.log('--- [ePRX_UV2] FETCHING_HISTORY_FOR_USER:', userId);
     return this.prisma.activity.findMany({
       where: {
         userId: userId, // Ensure this matches your Prisma schema field name

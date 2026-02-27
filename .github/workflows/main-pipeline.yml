@@ -1,4 +1,4 @@
-name: ePRX UV1 Master Pipeline
+name: ePRX UV2 Master Pipeline
 
 on:
   push:

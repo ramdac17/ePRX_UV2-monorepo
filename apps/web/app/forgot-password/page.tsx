@@ -64,7 +64,7 @@ const ForgotPasswordForm = () => {
               <input
                 type="email"
                 style={styles.input}
-                placeholder="runner@eprx.uv1"
+                placeholder="runner@eprx.uv2"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

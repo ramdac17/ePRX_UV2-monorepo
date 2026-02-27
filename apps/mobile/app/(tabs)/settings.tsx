@@ -49,7 +49,7 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>ePRX_UV1 // TERMINAL_V1.0.4</Text>
+        <Text style={styles.footerText}>ePRX_UV2 // TERMINAL_V1.0.4</Text>
       </View>
     </ScrollView>
   );

@@ -8,13 +8,13 @@ export class MailService {
   private transporter: nodemailer.Transporter<SentMessageInfo, Options>;
 
   constructor() {
-    
-    console.log('MAIL_HOST:', process.env.MAIL_HOST);   
-    
+
+    console.log('MAIL_HOST:', process.env.MAIL_HOST);
+
     this.transporter = nodemailer.createTransport({
       host: process.env.MAIL_HOST,
       port: Number(process.env.MAIL_PORT),
-      secure: false, 
+      secure: false,
       auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
@@ -26,7 +26,7 @@ export class MailService {
     const url = `${process.env.BACKEND_URL}/api/auth/verify-email?token=${token}`;
 
     // const url = "${process.env.BACKEND_URL}/auth/verify-email?token=${token}";
-    
+
     try {
       // Logic: One single, protected call with real data
       const info = await this.transporter.sendMail({
@@ -38,7 +38,7 @@ export class MailService {
     <div style="max-width: 600px; margin: 0 auto; border: 1px solid #333; background-color: #000000; padding: 40px; border-top: 4px solid #d4ff00;">
       
       <h1 style="color: #d4ff00; font-size: 28px; letter-spacing: 5px; margin-bottom: 20px; font-weight: 800; text-transform: uppercase;">
-        ePRX UV1
+        ePRX UV2
       </h1>
       
       <div style="height: 1px; background-color: #333; margin: 20px 0;"></div>
@@ -65,7 +65,7 @@ export class MailService {
       <div style="height: 1px; background-color: #333; margin: 20px 0;"></div>
       
       <p style="font-size: 10px; color: #444444; letter-spacing: 2px;">
-        © 2026 ePRX || CORE_SYSTEM_UV1
+        © 2026 ePRX || CORE_SYSTEM_UV2
       </p>
     </div>
   </div>
@@ -82,12 +82,12 @@ export class MailService {
   }
 
   async sendPasswordResetEmail(email: string, resetUrl: string) {
-  try {
-    await this.transporter.sendMail({
-      from: '"ePRX SECURITY" <no-reply@eprx.uv1>', // Match your brand
-      to: email,
-      subject: 'RECOVERY_PROTOCOL: PASSWORD_RESET_REQUEST',
-      html: `
+    try {
+      await this.transporter.sendMail({
+        from: '"ePRX SECURITY" <no-reply@eprx.uv2>', // Match your brand
+        to: email,
+        subject: 'RECOVERY_PROTOCOL: PASSWORD_RESET_REQUEST',
+        html: `
         <div style="font-family: 'Courier New', Courier, monospace; background-color: #0a0a0a; color: #d4ff00; padding: 40px; border: 1px solid #d4ff00;">
           <h2 style="text-transform: uppercase; letter-spacing: 2px;">Identity Recovery Initiated</h2>
           <hr style="border: 0; border-top: 1px solid #d4ff00;" />
@@ -101,15 +101,15 @@ export class MailService {
             </a>
           </div>
           
-          <p style="font-size: 12px; color: #888;">If you did not request this, please ignore this email or contact the ePRX UV1 security team.</p>
+          <p style="font-size: 12px; color: #888;">If you did not request this, please ignore this email or contact the ePRX UV2 security team.</p>
         </div>
       `,
-    });
-    console.log('✅ RESET_EMAIL_SENT_TO:', email);
-  } catch (error) {
-    console.error('❌ MAIL_SERVICE_ERROR:', error);
-    throw new Error('FAILED_TO_SEND_RECOVERY_EMAIL');
+      });
+      console.log('✅ RESET_EMAIL_SENT_TO:', email);
+    } catch (error) {
+      console.error('❌ MAIL_SERVICE_ERROR:', error);
+      throw new Error('FAILED_TO_SEND_RECOVERY_EMAIL');
+    }
   }
-  }
-  
+
 }

@@ -25,7 +25,7 @@ async function bootstrap() {
     origin: [
       'http://localhost:3000',
       'http://localhost:5173',
-      'https://eprxuv1-monorepo-production.up.railway.app', // <-- ADD YOUR RAILWAY WEB URL HERE
+      'https://eprxuv2-monorepo-production.up.railway.app', // <-- ADD YOUR RAILWAY WEB URL HERE
       /\.railway\.app$/, // This regex allows ANY subdomain on railway.app (very helpful for testing)
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -45,7 +45,7 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT || 3000, '0.0.0.0');
 
-  console.log(`🚀 ePRX UV1 Backend: http://localhost:${port}/api`);
+  console.log(`🚀 ePRX UV2 Backend: http://localhost:${port}/api`);
   console.log(`📂 Static Assets: http://localhost:${port}/uploads/`);
 }
 bootstrap();

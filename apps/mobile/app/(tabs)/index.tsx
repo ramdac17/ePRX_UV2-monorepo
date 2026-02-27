@@ -168,7 +168,7 @@ export default function TabOneScreen() {
               <Text style={[styles.glitchTextOpearative, { fontSize: 24 }]}>
                 {user?.firstName?.toUpperCase() || "OPERATIVE"}
               </Text>
-              <Text style={styles.subTitle}>ePRX_UV1 // DASHBOARD_ACCESS</Text>
+              <Text style={styles.subTitle}>ePRX_UV2 // DASHBOARD_ACCESS</Text>
             </View>
             <TouchableOpacity
               onPress={() => router.push("/profile")}
@@ -180,9 +180,9 @@ export default function TabOneScreen() {
                     uri: user.image?.startsWith("http")
                       ? user.image
                       : `${BASE_IMAGE_URL}/${user.image}`.replace(
-                          /([^:]\/)\/+/g,
-                          "$1",
-                        ), // This regex prevents double slashes //
+                        /([^:]\/)\/+/g,
+                        "$1",
+                      ), // This regex prevents double slashes //
                   }}
                   style={styles.avatarCircle}
                 />

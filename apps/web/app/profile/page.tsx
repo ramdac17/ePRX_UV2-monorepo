@@ -69,7 +69,7 @@ export default function ProfilePage() {
     downloadAnchorNode.setAttribute("href", dataStr);
     downloadAnchorNode.setAttribute(
       "download",
-      `ePRX_UV1_DATA_${user.username}.json`,
+      `ePRX_UV2_DATA_${user.username}.json`,
     );
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();

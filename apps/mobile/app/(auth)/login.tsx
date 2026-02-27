@@ -45,7 +45,7 @@ export default function LoginScreen() {
         // 2. Set the global API header immediately
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-        console.log("ePRX_UV1_SESSION_ESTABLISHED");
+        console.log("ePRX_UV2_SESSION_ESTABLISHED");
 
         // 3. Redirect - The RootLayout will now see 'hasToken' as true
         router.replace("/(tabs)");
@@ -72,7 +72,7 @@ export default function LoginScreen() {
 
         <View style={styles.header}>
           <Text style={styles.logoText}>
-            ePRX <Text style={{ color: CYBER_THEME.primary }}>UV1</Text>
+            ePRX <Text style={{ color: CYBER_THEME.primary }}>UV2</Text>
           </Text>
           <Text style={styles.subtitle}>
             {isLoading ? "VERIFYING_CREDENTIALS..." : "AUTHENTICATION_REQUIRED"}

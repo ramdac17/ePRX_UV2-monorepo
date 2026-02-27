@@ -141,7 +141,7 @@ export default function ArticleDetailPage() {
         <footer style={styles.footer}>
           <div style={styles.footerLine}></div>
           <p style={styles.footerText}>
-            END_OF_TRANSMISSION // ePRX_UV1_PROTOCOL
+            END_OF_TRANSMISSION // ePRX_UV2_PROTOCOL
           </p>
         </footer>
       </motion.div>

@@ -33,7 +33,7 @@ export class UpdateUserProfileDto {
 // --- Controller ---
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   /** DELETE: Remove user account (authenticated user only) */
   @UseGuards(JwtAuthGuard)
@@ -47,7 +47,7 @@ export class UserController {
     await this.userService.purgeAccount(id);
     return {
       status: 'PURGE_COMPLETE',
-      message: 'ALL_DATA_ERASED_FROM_EPRX_UV1',
+      message: 'ALL_DATA_ERASED_FROM_EPRX_UV2',
     };
   }
 

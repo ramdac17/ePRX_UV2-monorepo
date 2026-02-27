@@ -3,7 +3,7 @@ import { PrismaService } from './prisma.service';
 
 @Controller('health')
 export class HealthController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   @Get()
   async check() {
@@ -14,7 +14,7 @@ export class HealthController {
         status: 'ok',
         timestamp: new Date().toISOString(),
         database: 'connected',
-        project: 'ePRX UV1',
+        project: 'ePRX UV2',
       };
     } catch (e) {
       if (e instanceof Error) {

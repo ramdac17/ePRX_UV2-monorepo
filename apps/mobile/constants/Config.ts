@@ -3,4 +3,4 @@ const PORT = "3001";
 
 // export const API_URL = `http://${IP_ADDRESS}:${PORT}/api`;
 export const ASSETS_URL = `http://${IP_ADDRESS}:${PORT}/uploads`;
-export const API_URL = `https://eprxuv1-monorepo-production.up.railway.app/api`;
+export const API_URL = `https://eprxuv2-monorepo-production.up.railway.app/api`;

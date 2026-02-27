@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "ePRX UV1",
-    "slug": "eprx-uv1-monorepo",
-    "scheme": "eprx-uv1",
+    "name": "ePRX UV2",
+    "slug": "eprx-uv2-monorepo",
+    "scheme": "eprx-uv2",
     "version": "1.0.0",
     "owner": "ramdac17",
     "orientation": "portrait",
@@ -15,17 +15,21 @@
       "backgroundColor": "#000000"
     },
     "android": {
-      "package": "com.eprx.uv1",
+      "package": "com.eprx.uv2",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#000000"
       }
     },
     "ios": {
-      "bundleIdentifier": "com.eprx.uv1",
+      "bundleIdentifier": "com.eprx.uv2",
       "supportsTablet": true
     },
-    "plugins": ["expo-router", "expo-font", "expo-secure-store"],
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-secure-store"
+    ],
     "experiments": {
       "typedRoutes": true
     },

@@ -4,7 +4,7 @@ import { getToken } from "./authStorage";
 // Use the environment variable, but fallback to Railway URL if it's missing
 const API_URL =
   process.env.EXPO_PUBLIC_API_URL?.replace(/\/+$/, "") ||
-  "https://eprxuv1-monorepo-production.up.railway.app/api";
+  "https://eprxuv2-monorepo-production.up.railway.app/api";
 
 const api = axios.create({
   baseURL: API_URL,

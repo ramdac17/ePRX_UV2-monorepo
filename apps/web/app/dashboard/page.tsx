@@ -158,7 +158,7 @@ export default function Home() {
             <div style={styles.topHeroLogo} className="logo-glow">
               <img
                 src="/ePRE1.png"
-                alt="ePRX UV1"
+                alt="ePRX UV2"
                 style={styles.logoImageStyle}
               />
             </div>

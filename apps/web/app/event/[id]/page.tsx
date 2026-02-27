@@ -29,7 +29,7 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ePRX UV1 Connection Protocol
+  // ePRX UV2 Connection Protocol
   const BACKEND_API =
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
   const STATIC_URL = BACKEND_API.replace("/api", "");
@@ -151,7 +151,7 @@ export default function EventDetailPage() {
         <footer style={styles.footer}>
           <div style={styles.footerLine}></div>
           <p style={styles.footerText}>
-            END_OF_TRANSMISSION // ePRX_UV1_PROTOCOL
+            END_OF_TRANSMISSION // ePRX_UV2_PROTOCOL
           </p>
         </footer>
       </motion.div>

@@ -75,7 +75,7 @@ export default function RegisterScreen() {
             <Text style={styles.logoText}>
               NEW <Text style={{ color: CYBER_THEME.primary }}>USER</Text>
             </Text>
-            <Text style={styles.subtitle}>CREATE_NEW_IDENTITY_ON_ePRX_UV1</Text>
+            <Text style={styles.subtitle}>CREATE_NEW_IDENTITY_ON_ePRX_UV2</Text>
           </View>
 
           <View style={styles.glassCard}>

@@ -27,7 +27,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "ePRX UV1 | Beyond the Mile",
+  title: "ePRX UV2 | Beyond the Mile",
   description: "High-performance lifestyle brand.",
 };
 

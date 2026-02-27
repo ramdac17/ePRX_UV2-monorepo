@@ -3,12 +3,12 @@ import { PrismaService } from '../prisma.service.js';
 
 @Injectable()
 export class ArticlesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // Fixes the "getLatestArticles" error
   async getLatestArticles() {
     return this.prisma.article.findMany({
-      take: 10, // Adjust as needed for the ePRX UV1 feed
+      take: 10, // Adjust as needed for the ePRX UV2 feed
       orderBy: { createdAt: 'desc' },
       include: {
         author: {

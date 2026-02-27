@@ -11,7 +11,7 @@ export default function PostEventPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // ePRX UV1: Dedicated Backend Port
+  // ePRX UV2: Dedicated Backend Port
   const BACKEND_API =
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
