@@ -1,25 +1,39 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 
-const CRASH_KEY = "APP_CRASH_LOG";
+const CRASH_LOG_KEY = "eprx_crash_logs";
 
-export const logCrash = async (error: any) => {
+export async function logCrash(error: any) {
   try {
-    const existing = await AsyncStorage.getItem(CRASH_KEY);
-    const logs = existing ? JSON.parse(existing) : [];
+    const oldLogs = await getCrashLogs();
+    const timestamp = new Date().toISOString();
+    const newLog = {
+      timestamp,
+      message: error?.message || String(error),
+      stack: error?.stack || "No stack available",
+    };
 
-    logs.push({
-      message: error?.message || "Unknown error",
-      stack: error?.stack || "",
-      date: new Date().toISOString(),
-    });
+    // Keep only last 50 crashes
+    const updatedLogs = [newLog, ...(oldLogs || [])].slice(0, 50);
+    await SecureStore.setItemAsync(CRASH_LOG_KEY, JSON.stringify(updatedLogs));
+  } catch (e) {
+    console.error("CRASH_LOGGING_FAILED", e);
+  }
+}
 
-    await AsyncStorage.setItem(CRASH_KEY, JSON.stringify(logs.slice(-20)));
-  } catch {}
-};
+export async function getCrashLogs() {
+  try {
+    const logsStr = await SecureStore.getItemAsync(CRASH_LOG_KEY);
+    return logsStr ? JSON.parse(logsStr) : [];
+  } catch (e) {
+    console.error("CRASH_LOG_RETRIEVAL_FAILED", e);
+    return [];
+  }
+}
 
-export const getCrashLogs = async () => {
-  const logs = await AsyncStorage.getItem(CRASH_KEY);
-  return logs ? JSON.parse(logs) : [];
-};
-
-export const clearCrashLogs = () => AsyncStorage.removeItem(CRASH_KEY);
+export async function clearCrashLogs() {
+  try {
+    await SecureStore.deleteItemAsync(CRASH_LOG_KEY);
+  } catch (e) {
+    console.error("CRASH_LOG_CLEAR_FAILED", e);
+  }
+}

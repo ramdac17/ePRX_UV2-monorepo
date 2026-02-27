@@ -13,7 +13,9 @@
     "sync-ip": "node scripts/update-ip.js",
     "start:api": "node dist/apps/api/main.js",
     "postinstall": "prisma generate --schema=apps/api/prisma/schema.prisma",
-    "start:railway": "npx prisma migrate deploy && node dist/apps/api/main.js"
+    "start:railway": "npx prisma migrate deploy && node dist/apps/api/main.js",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "devDependencies": {
     "metro": "0.76.9",
@@ -44,9 +46,13 @@
   "dependencies": {
     "@prisma/client": "^7.3.0",
     "cross-env": "^7.0.3",
-    "prisma": "^7.3.0"
+    "prisma": "^7.3.0",
+    "expo": "~54.0.33",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
   },
   "prisma": {
     "schema": "apps/api/prisma/schema.prisma"
-  }
+  },
+  "version": "1.0.0"
 }
